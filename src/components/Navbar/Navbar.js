@@ -30,7 +30,7 @@ import {
   DrawerHeader,
   Alert,
   AlertIcon,
-  Tooltip
+  Tooltip,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
 import { Colormodebtn } from "../ToggleColorMode/Colormodebtn";
@@ -38,18 +38,26 @@ import { useAuth } from "../../backend/Auth";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../backend/supabaseClient";
 import { Formik, Field, setIn } from "formik";
-import { InfoIcon } from'@chakra-ui/icons';
-import { useToast } from '@chakra-ui/react'
+import { InfoIcon } from "@chakra-ui/icons";
+import { useToast } from "@chakra-ui/react";
 
 export const Navbar = () => {
   const [display, changeDisplay] = useState("none");
   const [inputValue, setInputValue] = useState("");
   const { user, signOut } = useAuth();
-  const { isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
-  const { isOpen: isNotifOpen, onOpen: onNotifOpen, onClose: onNotifClose } = useDisclosure();
-  const btnRef = React.useRef()
+  const {
+    isOpen: isModalOpen,
+    onOpen: onModalOpen,
+    onClose: onModalClose,
+  } = useDisclosure();
+  const {
+    isOpen: isNotifOpen,
+    onOpen: onNotifOpen,
+    onClose: onNotifClose,
+  } = useDisclosure();
+  const btnRef = React.useRef();
   const history = useNavigate();
-  const toast = useToast()
+  const toast = useToast();
 
   async function handleSignOut() {
     // Ends user session
@@ -60,36 +68,36 @@ export const Navbar = () => {
   }
 
   async function getProfile() {
-    if (user != null){
-    try {
-      const user = supabase.auth.user();
-      let { data, error, status } = await supabase
-        .from("profiles")
-        .select(`username`)
-        .eq("id", user.id)
-        .single();
+    if (user != null) {
+      try {
+        const user = supabase.auth.user();
+        let { data, error, status } = await supabase
+          .from("profiles")
+          .select(`username`)
+          .eq("id", user.id)
+          .single();
 
-      if (error && status === 406) {
-        onModalOpen();
-        return("none")
-      } else {
+        if (error && status === 406) {
+          onModalOpen();
+          return "none";
+        } else {
+          toast({
+            title: "Username is already set.",
+            status: "success",
+            duration: 1000,
+            isClosable: true,
+          });
+        }
+      } catch (error) {
         toast({
-          title: 'Username is already set.',
-          status: 'success',
-          duration: 1000,
+          title: "Error " + error.status,
+          description: error.message,
+          status: "error",
+          duration: 4000,
           isClosable: true,
-        })
+        });
       }
-    } catch (error) {
-      toast({
-        title: "Error " + error.status,
-        description: error.message,
-        status: "error",
-        duration: 4000,
-        isClosable: true,
-      });
     }
-  }
   }
 
   async function handleSubmit(values) {
@@ -150,12 +158,15 @@ export const Navbar = () => {
                 >
                   Dashboard
                 </Button>
-                <IconButton icon={<InfoIcon/>} my={5}
+                <IconButton
+                  icon={<InfoIcon />}
+                  my={5}
                   w="50%"
                   variant={"outline"}
                   ml={"1"}
                   onClick={onNotifOpen}
-                  ref={btnRef}/>
+                  ref={btnRef}
+                />
                 <Button
                   href="/"
                   as="a"
@@ -239,15 +250,19 @@ export const Navbar = () => {
             <Button as="a" href="/" variant="ghost" aria-label="Home" w="100%">
               Home
             </Button>
-            <Button
-              as="a"
-              href="/about"
-              variant="ghost"
-              aria-label="About"
-              w="100%"
-            >
-              About
-            </Button>
+            {user ? (
+              <Button
+                as="a"
+                href="/dashboard"
+                variant="ghost"
+                aria-label="Dashboard"
+                w="100%"
+              >
+                Dashboard
+              </Button>
+            ) : (
+              " "
+            )}
             <Button
               as="a"
               href="/login"
@@ -270,7 +285,14 @@ export const Navbar = () => {
         </Flex>
       </Flex>
 
-      <Modal onClose={onModalClose} isOpen={isModalOpen} isCentered size={"md"} closeOnOverlayClick={false} closeOnEsc={false}>
+      <Modal
+        onClose={onModalClose}
+        isOpen={isModalOpen}
+        isCentered
+        size={"md"}
+        closeOnOverlayClick={false}
+        closeOnEsc={false}
+      >
         <ModalOverlay />
         <ModalContent p="10px">
           <ModalHeader pb={"5px"}>Set a Username</ModalHeader>
@@ -285,57 +307,56 @@ export const Navbar = () => {
             >
               {({ handleSubmit, errors, touched }) => (
                 <form onSubmit={handleSubmit}>
-                <VStack spacing={4} align="flex-start">
-                  <FormControl
-                    isInvalid={!!errors.username && touched.username}
-                  >
-                    <FormLabel htmlFor="username" fontSize="sm">
-                      Username
-                    </FormLabel>
-                    <Field
-                      as={Input}
-                      placeholder="johnDoe2"
-                      variant={"flushed"}
-                      borderBottomColor="gray.300"
-                      id="username"
-                      type="username"
-                      name="username"
-                      validate={(value) => {
-                        let error;
-
-                        if (value.length < 5) {
-                          error = "Username must contain at least 6 characters";
-                        } else if(value.toString().indexOf(' ') > 0) {
-                          error = "Username can't have spaces.";
-                        } else {
-                          error = null;
-                        }
-
-                        return error;
-                      }}
-                    />
-                    {errors.username ? (
-                      <FormErrorMessage color={"red.400"} display="block">
-                        {errors.username}
-                      </FormErrorMessage>
-                    ) : (
-                      ""
-                    )}
-
-                    
-                  </FormControl>
-                  <FormControl>
-                  <Button
-                      type="submit"
-                      float={'right'}
-                      variant={"outline"}
-                      colorScheme="purple"
-                      color={"purple.600"}
+                  <VStack spacing={4} align="flex-start">
+                    <FormControl
+                      isInvalid={!!errors.username && touched.username}
                     >
-                      Set Username
-                    </Button>
-                  </FormControl>
-                </VStack>
+                      <FormLabel htmlFor="username" fontSize="sm">
+                        Username
+                      </FormLabel>
+                      <Field
+                        as={Input}
+                        placeholder="johnDoe2"
+                        variant={"flushed"}
+                        borderBottomColor="gray.300"
+                        id="username"
+                        type="username"
+                        name="username"
+                        validate={(value) => {
+                          let error;
+
+                          if (value.length < 5) {
+                            error =
+                              "Username must contain at least 6 characters";
+                          } else if (value.toString().indexOf(" ") > 0) {
+                            error = "Username can't have spaces.";
+                          } else {
+                            error = null;
+                          }
+
+                          return error;
+                        }}
+                      />
+                      {errors.username ? (
+                        <FormErrorMessage color={"red.400"} display="block">
+                          {errors.username}
+                        </FormErrorMessage>
+                      ) : (
+                        ""
+                      )}
+                    </FormControl>
+                    <FormControl>
+                      <Button
+                        type="submit"
+                        float={"right"}
+                        variant={"outline"}
+                        colorScheme="purple"
+                        color={"purple.600"}
+                      >
+                        Set Username
+                      </Button>
+                    </FormControl>
+                  </VStack>
                 </form>
               )}
             </Formik>
@@ -345,7 +366,7 @@ export const Navbar = () => {
 
       <Drawer
         isOpen={isNotifOpen}
-        placement='right'
+        placement="right"
         onClose={onNotifClose}
         finalFocusRef={btnRef}
       >
@@ -354,20 +375,24 @@ export const Navbar = () => {
           <DrawerCloseButton />
           <DrawerHeader>Account Settings</DrawerHeader>
           <DrawerBody>
-          
-          <Tooltip label='This is required for most sharing purposes.'>
-          <Alert status="error" borderRadius={5} onClick={getProfile} cursor='pointer'>
-            <AlertIcon/>
-            Set Your Username
-          </Alert></Tooltip>
-
+            <Tooltip label="This is required for most sharing purposes.">
+              <Alert
+                status="error"
+                borderRadius={5}
+                onClick={getProfile}
+                cursor="pointer"
+              >
+                <AlertIcon />
+                Set Your Username
+              </Alert>
+            </Tooltip>
           </DrawerBody>
 
           <DrawerFooter>
-            <Button variant='outline' mr={3} onClick={onNotifClose}>
+            <Button variant="outline" mr={3} onClick={onNotifClose}>
               Cancel
             </Button>
-            <Button colorScheme='blue'>Save</Button>
+            <Button colorScheme="blue">Save</Button>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>

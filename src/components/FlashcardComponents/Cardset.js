@@ -543,7 +543,7 @@ export const Cardset = () => {
       <>
         <Modal isOpen={isAddOpen} onClose={onAddClose} size={"2xl"} isCentered>
           <ModalOverlay />
-          <ModalContent w={"full"} p="3">
+          <ModalContent w={"95vw"} p="3">
             <ModalHeader textAlign={"center"}>Add A Card</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
@@ -603,7 +603,7 @@ export const Cardset = () => {
                 </>
 
                 <ButtonGroup w="100%">
-                  <SimpleGrid columns={3} spacingX={2} spacing={2} my="3">
+                  <SimpleGrid columns={[2,3,3,3,3,3,3]} spacingX={2} spacing={2} my="3">
                     <Tooltip label="Add an Image.">
                       <Button variant={"solid"} px={3} onClick={onImgOpen}>
                         Image

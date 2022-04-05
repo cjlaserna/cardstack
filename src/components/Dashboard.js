@@ -30,6 +30,7 @@ import {
   ModalFooter,
   Fade,
   Collapse,
+  useMediaQuery,
 } from "@chakra-ui/react";
 import { Field, Formik } from "formik";
 import React, { useState, useEffect } from "react";
@@ -62,6 +63,9 @@ export const Dashboard = () => {
     onClose: onDelClose,
   } = useDisclosure();
 
+  // media query
+  const [isSmallerThan767] = useMediaQuery('(max-width: 767px)')
+  
   // fetch user cardsets
   async function fetchCardsets() {
     let { data: cardsets, error } = await supabase
@@ -328,7 +332,7 @@ export const Dashboard = () => {
           size={"md"}
         >
           <ModalOverlay />
-          <ModalContent p="10px">
+          <ModalContent p="10px" w={'95vw'}>
             <ModalCloseButton />
             <ModalHeader pb={"5px"}>Add New Card Set</ModalHeader>
             <ModalBody>
@@ -447,7 +451,8 @@ export const Dashboard = () => {
             position="fixed"
             display={"flex"}
             justifyContent="center"
-            w="inherit"
+            w={isSmallerThan767 ? 'unset' :'inherit'}
+            left={isSmallerThan767 ? '3' :'unset'}
           >
             <ScaleFade initialScale={0.9} in={onDel}>
               <Button
