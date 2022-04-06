@@ -64,6 +64,7 @@ export const CardsetFull = () => {
   const [slider, setSlider] = useState(null);
   const [fontSize, setFontSize] = useState("1.25em");
   const [cardStack, setCardStack] = useState(null);
+  const [cardOriginal, setCardOriginal] = useState(null);
 
   // toast
   const toast = useToast();
@@ -73,7 +74,7 @@ export const CardsetFull = () => {
   const setTitle = useParams().setname;
 
   // shuffle
-  var shuffle = require('shuffle-array');
+  var shuffle = require("shuffle-array");
 
   // fetch user
   async function fetchCardset() {
@@ -115,6 +116,7 @@ export const CardsetFull = () => {
     if (cardset) {
       setCardData(cardset);
       setCardStack(cardset.cards.cards);
+      setCardOriginal(cardset.cards.cards);
       setIsLoading(false);
     }
 
@@ -154,40 +156,34 @@ export const CardsetFull = () => {
     let arr = [];
 
     object.map((card) => {
-      arr.push(card)
-    })
+      arr.push(card);
+    });
     shuffle(arr);
     setCardStack(arr);
     console.log(cardStack);
     console.log(arr);
   }
 
+  function resetCards(){
+    setCardStack(cardOriginal);
+    console.log(cardOriginal);
+  }
+
   // share card set
   function copyCardSetLink() {
     navigator.clipboard.writeText(window.location.href.toString());
     toast({
-      title: 'Link Copied',
-      status: 'success',
-      duration: '1000',
+      title: "Link Copied",
+      status: "success",
+      duration: "1000",
       isClosable: true,
-    })
+    });
   }
-
-  // handle keys
-  const handleKeyPress = (e) => {
-    console.log(e.key);
-  };
-  const handleKeyRight = (e) => {
-    console.log(e.key);
-  };
-
 
   // fetch cards once
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyPress);
     setIsLoading(true);
     fetchCardset();
-    return () => document.removeEventListener("keydown", handleKeyPress);
   }, []);
   return (
     <Container
@@ -225,7 +221,9 @@ export const CardsetFull = () => {
                   <Slider
                     dots={false}
                     infinite={true}
+                    accessibility
                     speed="300"
+                    focusOnSelect
                     slidesToShow={1}
                     slidesToScroll={1}
                     arrows={false}
@@ -249,13 +247,13 @@ export const CardsetFull = () => {
                   <Box my={1}>
                     <IconButton
                       icon={<ArrowForwardIcon />}
-                      onClick={() => slider?.slickNext()}
+                      onClick={() => slider.slickNext()}
                       display="inline"
                       float={"right"}
                     />
                     <IconButton
                       icon={<ArrowBackIcon />}
-                      onClick={() => slider?.slickPrev()}
+                      onClick={() => slider.slickPrev()}
                       display="inline"
                       float={"left"}
                     />
@@ -282,13 +280,22 @@ export const CardsetFull = () => {
                 w="full"
               >
                 <SimpleGrid
-                  columns={[1, 1, 2, 2, 3, 3, 3]}
-                  spacingX={2}
+                  columns={[1, 1, 2, 2, 2, 2, 2]}
                   spacing={2}
                   pt={5}
                 >
-                  <Button colorScheme={"blue"} href={`/cardset/${username}/${setTitle}`} as='a'>View this Card Set</Button>
-                  <Button colorScheme={"blue"} variant="outline" onClick={copyCardSetLink}>
+                  <Button
+                    colorScheme={"blue"}
+                    href={`/cardset/${username}/${setTitle}`}
+                    as="a"
+                  >
+                    View this Card Set
+                  </Button>
+                  <Button
+                    colorScheme={"blue"}
+                    variant="outline"
+                    onClick={copyCardSetLink}
+                  >
                     Share this Card Set
                   </Button>
                   <Button
@@ -297,6 +304,13 @@ export const CardsetFull = () => {
                     onClick={shuffleCards}
                   >
                     Shuffle Card Set
+                  </Button>
+                  <Button
+                    colorScheme={"blue"}
+                    variant="outline"
+                    onClick={resetCards}
+                  >
+                    Reset Shuffle
                   </Button>
                 </SimpleGrid>
 

@@ -251,36 +251,49 @@ export const Navbar = () => {
               Home
             </Button>
             {user ? (
-              <Button
-                as="a"
-                href="/dashboard"
-                variant="ghost"
-                aria-label="Dashboard"
-                w="100%"
-              >
-                Dashboard
-              </Button>
+              <>
+                <Button
+                  as="a"
+                  href="/"
+                  variant="ghost"
+                  aria-label="Sign Out"
+                  w="100%"
+                >
+                  Log Out
+                </Button>
+                <Button
+                  as="a"
+                  href="/dashboard"
+                  variant="ghost"
+                  aria-label="Dashboard"
+                  onClick={handleSignOut}
+                  w="100%"
+                >
+                  Dashboard
+                </Button>
+              </>
             ) : (
-              " "
+              <>
+                <Button
+                  as="a"
+                  href="/login"
+                  variant="ghost"
+                  aria-label="Login"
+                  w="100%"
+                >
+                  Login
+                </Button>
+                <Button
+                  as="a"
+                  href="/signup"
+                  variant="ghost"
+                  aria-label="signup"
+                  w="100%"
+                >
+                  Signup
+                </Button>
+              </>
             )}
-            <Button
-              as="a"
-              href="/login"
-              variant="ghost"
-              aria-label="Login"
-              w="100%"
-            >
-              Login
-            </Button>
-            <Button
-              as="a"
-              href="/signup"
-              variant="ghost"
-              aria-label="signup"
-              w="100%"
-            >
-              Signup
-            </Button>
           </Stack>
         </Flex>
       </Flex>

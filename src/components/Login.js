@@ -81,8 +81,6 @@ export const Login = () => {
         backdropBlur="8px"
         backgroundColor={"white"}
         w={["100%", "80%", "50%", "40%", "30%", '25%']}
-        h={["40%", "40%", "40%", "40%", "40%", '40%']}
-        maxH='40%'
       >
         <Heading>Login</Heading>
         <Container mt={[5, 5, 5, 5, 5]} ml="0" p="0">

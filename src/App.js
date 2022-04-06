@@ -10,6 +10,7 @@ import { Dashboard } from "./components/Dashboard";
 import { Cardset } from "./components/FlashcardComponents/Cardset";
 import { Box } from "@chakra-ui/react";
 import { CardsetFull } from "./components/FlashcardComponents/CardsetFull";
+import { Username } from "./components/Username";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<Signup />} />
+        <Route path="username" element={<Username/>} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="cardset/:user/:setname" element={<Cardset/>} />
         <Route path="cardset/:user/:setname/full" element={<CardsetFull/>} />

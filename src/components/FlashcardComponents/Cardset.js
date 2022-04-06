@@ -591,7 +591,7 @@ export const Cardset = () => {
                         borderWidth="2px"
                         placeholder="Back Card Answer"
                         my="1px"
-                        maxLength="40"
+                        maxLength="75"
                         ref={backRef}
                       />
                     </Box>
