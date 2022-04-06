@@ -223,7 +223,6 @@ export const CardsetFull = () => {
                     infinite={true}
                     accessibility
                     speed="300"
-                    focusOnSelect
                     slidesToShow={1}
                     slidesToScroll={1}
                     arrows={false}
