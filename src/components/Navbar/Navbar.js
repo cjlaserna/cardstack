@@ -254,22 +254,22 @@ export const Navbar = () => {
               <>
                 <Button
                   as="a"
-                  href="/"
-                  variant="ghost"
-                  aria-label="Sign Out"
-                  w="100%"
-                >
-                  Log Out
-                </Button>
-                <Button
-                  as="a"
                   href="/dashboard"
                   variant="ghost"
                   aria-label="Dashboard"
-                  onClick={handleSignOut}
                   w="100%"
                 >
                   Dashboard
+                </Button>
+                <Button
+                  as="a"
+                  href="/"
+                  variant="ghost"
+                  aria-label="Sign Out"
+                  onClick={handleSignOut}
+                  w="100%"
+                >
+                  Log Out
                 </Button>
               </>
             ) : (
