@@ -69,7 +69,7 @@ export const Login = () => {
       justifyContent="center"
       alignItems={"center"}
       flexDirection="row"
-      h={"90vh"}
+      h={"75vh"}
       overflow="clip"
     >
       <Box

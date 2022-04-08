@@ -64,8 +64,8 @@ export const Dashboard = () => {
   } = useDisclosure();
 
   // media query
-  const [isSmallerThan767] = useMediaQuery('(max-width: 767px)')
-  
+  const [isSmallerThan767] = useMediaQuery("(max-width: 767px)");
+
   // fetch user cardsets
   async function fetchCardsets() {
     let { data: cardsets, error } = await supabase
@@ -153,7 +153,7 @@ export const Dashboard = () => {
         temp.splice(id, 1);
       }
       setCardsets(temp);
-      window.location.reload(false)
+      window.location.reload(false);
     }
   }
 
@@ -224,8 +224,8 @@ export const Dashboard = () => {
         ]}
       >
         <Box display="block">
-        <Heading>Dashboard</Heading>
-        <Text>Create and manage card sets in your dashboard.</Text>
+          <Heading>Dashboard</Heading>
+          <Text>Create and manage card sets in your dashboard.</Text>
         </Box>
         <Box w={"full"} display="flex" justifyContent="flex-end" py={2}>
           <Tooltip label="Delete a card set" placement="left">
@@ -332,7 +332,7 @@ export const Dashboard = () => {
           size={"md"}
         >
           <ModalOverlay />
-          <ModalContent p="10px" w={'95vw'}>
+          <ModalContent p="10px" w={"95vw"}>
             <ModalCloseButton />
             <ModalHeader pb={"5px"}>Add New Card Set</ModalHeader>
             <ModalBody>
@@ -363,11 +363,18 @@ export const Dashboard = () => {
                           autoComplete="off"
                           validate={(value) => {
                             let error;
-
+                            console.log(/@[a-zA-Z\s.\$_+!*',()-]/gm.test(value))
                             if (value.length < 3) {
                               error =
                                 "Set name must contain at least 3 characters";
                             }
+                            
+                            if (!/^[a-zA-Z\s.\$_+!*',()-]*$/gm.test(value)) {
+                              console.log(value)
+                              error =
+                                "Invalid character(s): [ ] { } |  ” % ~ # < > ";
+                            }
+                            
                             return error;
                           }}
                         />
@@ -451,8 +458,8 @@ export const Dashboard = () => {
             position="fixed"
             display={"flex"}
             justifyContent="center"
-            w={isSmallerThan767 ? 'unset' :'inherit'}
-            left={isSmallerThan767 ? '3' :'unset'}
+            w={isSmallerThan767 ? "unset" : "inherit"}
+            left={isSmallerThan767 ? "3" : "unset"}
           >
             <ScaleFade initialScale={0.9} in={onDel}>
               <Button
