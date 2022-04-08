@@ -30,6 +30,7 @@ import {
   DrawerHeader,
   Alert,
   AlertIcon,
+  useColorMode,
   Tooltip,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
@@ -43,7 +44,8 @@ import { useToast } from "@chakra-ui/react";
 
 export const Navbar = () => {
   const [display, changeDisplay] = useState("none");
-  const [inputValue, setInputValue] = useState("");
+  const { colorMode, toggleColorMode } = useColorMode()
+
   const { user, signOut } = useAuth();
   const {
     isOpen: isModalOpen,
@@ -226,7 +228,7 @@ export const Navbar = () => {
         <Flex
           w="100vw"
           display={display}
-          bgColor="gray.50"
+          bgColor={colorMode === 'light' ? "gray.50" : 'gray.800'}
           zIndex={20}
           h="100vh"
           pos="fixed"
