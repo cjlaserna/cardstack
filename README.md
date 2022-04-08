@@ -1,13 +1,13 @@
 # CardStack Project
-| This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+| Simple flashcard web app created with with [Create React App](https://github.com/facebook/create-react-app).
 
 This project was created with the intent of creating a **simple** flashcard site with **Latex** support. As time moves forward, I'll add support to other interesting components.
-## Known Bugs
-1. Certain characters in card set names conflict with URL and card set parameters.
-2. Keyboard input on full card set view stops working after clicking off of the card.
-## Future Features
-1. Virtual math keyboard
-2. Better code blocks
-4. Ability to edit cards
-5. Better verification emails
-6. Supporting Pages
+
+## [Site Demo](http://cardstack.vercel.app/)
+
+## Technologies, Libraries, etc.
+- [Chakra UI](https://chakra-ui.com) - React Component Library
+- [Supabase](supabase.io) - Backend Firebase Alternative
+- [React.js](https://reactjs.org)
+- [Node.js](https://nodejs.org/en/)
+- HTML5, CSS, JS
