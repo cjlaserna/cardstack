@@ -31,6 +31,7 @@ import {
   Fade,
   Collapse,
   useMediaQuery,
+  FormHelperText,
 } from "@chakra-ui/react";
 import { Field, Formik } from "formik";
 import React, { useState, useEffect } from "react";
@@ -360,21 +361,24 @@ export const Dashboard = () => {
                           id="cardsetName"
                           type="cardsetName"
                           name="cardsetName"
+                          maxLength="30"
                           autoComplete="off"
                           validate={(value) => {
                             let error;
-                            console.log(/@[a-zA-Z\s.\$_+!*',()-]/gm.test(value))
+                            console.log(
+                              /@[a-zA-Z\s.\$_+!*',()-]/gm.test(value)
+                            );
                             if (value.length < 3) {
                               error =
-                                "Set name must contain at least 3 characters";
+                                "Set name must be between 3-30 characters";
                             }
-                            
+
                             if (!/^[a-zA-Z\s.\$_+!*',()-]*$/gm.test(value)) {
-                              console.log(value)
+                              console.log(value);
                               error =
                                 "Invalid character(s): [ ] { } |  ” % ~ # < > ";
                             }
-                            
+
                             return error;
                           }}
                         />
@@ -392,21 +396,26 @@ export const Dashboard = () => {
                         )}
                       </FormControl>
 
-                      <Field
-                        as={Textarea}
-                        size={"md"}
-                        rows={5}
-                        h="auto"
-                        mb="10px"
-                        placeholder="Card Set Description (optional)"
-                        id="cardsetDesc"
-                        type="cardsetDesc"
-                        name="cardsetDesc"
-                        isRequired={false}
-                      />
-                      <Button float="right" type="submit">
-                        Submit
-                      </Button>
+                      <FormControl>
+                        <Box mb="10px">
+                          <Field
+                            as={Textarea}
+                            size={"md"}
+                            rows={5}
+                            h="auto"
+                            placeholder="Card Set Description (optional)"
+                            id="cardsetDesc"
+                            type="cardsetDesc"
+                            name="cardsetDesc"
+                            isRequired={false}
+                            maxLength="150"
+                          />
+                          <FormHelperText p={0} m={0}>Max: 150 Characters</FormHelperText>
+                        </Box>
+                        <Button float="right" type="submit">
+                          Submit
+                        </Button>
+                      </FormControl>
                     </VStack>
                   </form>
                 )}
