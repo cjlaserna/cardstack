@@ -19,6 +19,7 @@ import Spline from "@splinetool/react-spline";
 import Calculator from "../assets/calculator.png";
 import Code from "../assets/code.png";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
+import { Footer } from "./Footer/Footer";
 
 export const Home = () => {
   const ink = useColorModeValue("black", "#d3d4e2");
@@ -162,6 +163,8 @@ export const Home = () => {
             Get Started
           </Button>
         </Box>
+
+        <Footer/>
       </Container>
     </>
   );
