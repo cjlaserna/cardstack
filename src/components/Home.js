@@ -10,6 +10,7 @@ import {
   Img,
   Button,
   Link,
+  ButtonGroup,
 } from "@chakra-ui/react";
 import React from "react";
 import { LovingDoodle } from "react-open-doodles";
@@ -18,6 +19,7 @@ import Spline from "@splinetool/react-spline";
 import Calculator from "../assets/calculator.png";
 import Code from "../assets/code.png";
 import { ExternalLinkIcon } from "@chakra-ui/icons";
+import { Footer } from "./Footer/Footer";
 
 export const Home = () => {
   const ink = useColorModeValue("black", "#d3d4e2");
@@ -52,26 +54,47 @@ export const Home = () => {
           >
             <Heading size={"4xl"}>CardStack</Heading>
             <Heading as={"h4"} size="lg">
-              Flashcards Supporting{" "}
+              Flashcards Supporting
             </Heading>
-            <Heading as={"h4"} size="lg" color={colors.accent} display="inline">
+            <Heading as={"h4"} size="lg" color={colors.accent}>
               Latex and Code
             </Heading>
+            <ButtonGroup my={3}>
+              <Button
+                size={"lg"}
+                as="a"
+                href="/signup"
+                variant={"outline"}
+                colorScheme="teal"
+              >
+                Get Started
+              </Button>
+              <Button size={"lg"} as="a" href="#about" variant={"outline"}>
+                Learn More
+              </Button>
+            </ButtonGroup>
           </Box>
           <Box overflow={"clip"}>
             <Spline scene="https://prod.spline.design/ga3gtDxsya9ng8w3/scene.spline" />
           </Box>
         </Box>
-        <Box backgroundSize={"cover"} pb={[1, 1, 10, 10, 10, 10, 10]} m="0">
-          <SimpleGrid columns={[1, 1, 1, 2, 2, 2]} p={5} spacing="2">
+        <Box backgroundSize={"cover"} pb={[1, 1, 10, 10, 10, 10, 10]} my="10">
+          <Box textAlign={"center"} py={10} my={[0, 0, 10]}>
+            <Heading> Powerfully Simple. </Heading>
+            <Text fontSize={"1.25em"} textAlign={["left", "center"]} px={5}>
+              {" "}
+              Spend less time installing software and navigating through
+              complicated UI.{" "}
+            </Text>
+          </Box>
+          <SimpleGrid columns={[1, 1, 1, 2, 2, 2]} p={5} spacing="2" id="about">
             <Box p={[1, 1, 10, 10, 10, 10, 10]}>
               <Heading>Latex Support</Heading>
               <Text my={2} fontSize="1.25em" whiteSpace={"pre-wrap"}>
                 CardStack uses Katex to display and support built-in latex
-                functions. There aren't a lot of programs that support
-                math. Although complex flashcard programs have latex support,
-                the most popular ones don't. Cardstack aims to be a simpler
-                alternative. 
+                functions. There aren't a lot of programs that support math.
+                Although complex flashcard programs have latex support, the most
+                popular ones don't. Cardstack aims to be a simpler alternative.
               </Text>
             </Box>
             <Box
@@ -85,7 +108,7 @@ export const Home = () => {
             </Box>
           </SimpleGrid>
         </Box>
-        <Box backgroundSize={"cover"} pb={[1, 1, 10, 10, 10, 10, 10]} m="0">
+        <Box backgroundSize={"cover"} pb={[1, 1, 10, 10, 10, 10, 10]} my="10">
           <SimpleGrid columns={[1, 1, 1, 2, 2, 2]} p={5} spacing="2">
             <Box
               maxH={"100%"}
@@ -116,10 +139,19 @@ export const Home = () => {
           justifyContent="center"
           alignItems={"center"}
         >
-          <Heading>No Subcriptions, No Payments</Heading>
+          <SimpleGrid
+            columns={[1, 2, 2]}
+          >
+            <Box >
+              <Heading>Set up less, </Heading>
+            </Box>
+            <Box>
+              <Heading> study more.</Heading>
+            </Box>
+          </SimpleGrid>
           <Button
-            p={"10"}
-            fontSize="2em"
+            p={"5"}
+            fontSize="1.25em"
             variant={"outline"}
             colorScheme="teal"
             borderWidth={"2px"}
@@ -132,24 +164,7 @@ export const Home = () => {
           </Button>
         </Box>
 
-        <Box
-          backgroundSize={"cover"}
-          pt={10}
-          m="0"
-          flexDirection={"column"}
-          display="flex"
-          justifyContent="center"
-          alignItems={"center"}
-        >
-          <Heading size={"md"}>
-            {" "}
-            Made By{" "}
-            <Link href="https://cjlaserna.github.io" isExternal>
-              Catherine Laserna
-            </Link>{" "}
-            <ExternalLinkIcon />
-          </Heading>
-        </Box>
+        <Footer/>
       </Container>
     </>
   );

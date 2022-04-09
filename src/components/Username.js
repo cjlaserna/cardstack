@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Flex,
   Button,
@@ -35,45 +35,78 @@ import {
 } from "@chakra-ui/react";
 import { supabase } from "../backend/supabaseClient";
 import { Formik, Field } from "formik";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../backend/Auth";
 
 export const Username = () => {
+  const location = useLocation();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
   const {
     isOpen: isModalOpen,
     onOpen: onModalOpen,
     onClose: onModalClose,
   } = useDisclosure();
-
+  const { signIn } = useAuth();
   const toast = useToast();
   const history = useNavigate();
 
   async function handleSubmit(values) {
-    try {
-      const user = supabase.auth.user();
-      const username = values.username.toString();
-      const updates = {
-        id: user.id,
-        username,
-        updated_at: new Date(),
-      };
-
-      let { error } = await supabase.from("profiles").upsert(updates);
-      if (error) {
-        throw error;
-      } else {
-        onModalClose();
-      }
-    } catch (error) {
+    const { error } = await signIn({ email, password });
+    if (error) {
       toast({
         title: "Error " + error.status,
-        description: error.message,
+        description:  (error.message === "Email not confirmed") ? "Please confirm your email. Then, come back to this page." : error.message,
         status: "error",
         duration: 4000,
         isClosable: true,
       });
+    } else {
+      try {
+        const user = supabase.auth.user();
+        const username = values.username.toString();
+        const updates = {
+          id: user.id,
+          username,
+          updated_at: new Date(),
+        };
+
+        let { error } = await supabase.from("profiles").upsert(updates);
+        if (error) {
+          throw error;
+        } else {
+          onModalClose();
+        }
+      } catch (error) {
+        toast({
+          title: "Error " + error.status,
+          description: error.message,
+          status: "error",
+          duration: 4000,
+          isClosable: true,
+        });
+      }
+
+      history("/dashboard");
     }
-    history("/dashboard")
   }
+
+  window.onbeforeunload = (event) => {
+      const e = event || window.event;
+      // Cancel the event
+      e.preventDefault();
+      if (e) {
+        e.returnValue = ""; // Legacy method for cross browser support
+      }
+  };
+
+  useEffect(() => {
+    if (location.state) {
+      setEmail(location.state.email);
+      setPassword(location.state.password);
+    } // add an else if null, ask for email and password
+  }, [location]);
   return (
     <Box
       p={5}
