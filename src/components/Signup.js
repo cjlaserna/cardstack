@@ -40,7 +40,7 @@ export const Signup = () => {
 
     // Calls `signUp` function from the context
     const { error } = await signUp({ email, password });
-
+    
     if (error) {
       toast({
         title: "Error " + error.status,
@@ -56,18 +56,11 @@ export const Signup = () => {
         duration: 4000,
         isClosable: true,
       });
-      const { error } = await signIn({ email, password });
 
-      if (error) {
-        toast({
-          title: "Error " + error.status,
-          description: error.message,
-          status: "error",
-          duration: 4000,
-          isClosable: true,
-        });
-      }
-      history("/username");
+      console.log(email);
+      console.log(password);
+      
+      history( "/username", {state: {email: email, password: password}});
     }
   }
 
@@ -83,7 +76,7 @@ export const Signup = () => {
       overflow="clip"
     >
       <Box
-        color='black'
+        color="black"
         boxShadow="md"
         p="10"
         rounded="xl"
@@ -107,7 +100,7 @@ export const Signup = () => {
               <form onSubmit={handleSubmit}>
                 <VStack spacing={4} align="flex-start">
                   <FormControl isInvalid={!!errors.email && touched.email}>
-                    <FormLabel htmlFor="email" fontSize="sm" display={'none'}>
+                    <FormLabel htmlFor="email" fontSize="sm" display={"none"}>
                       Email
                     </FormLabel>
                     <Field

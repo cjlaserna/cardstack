@@ -16,13 +16,13 @@ import theme from "./theme";
 ReactDOM.render(
   <ChakraProvider>
     <ThemeProvider theme={theme}>
+        <React.StrictMode>
       <BrowserRouter>
         <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-        <React.StrictMode>
           <CSSReset />
           <App />
-        </React.StrictMode>
       </BrowserRouter>
+        </React.StrictMode>
     </ThemeProvider>
   </ChakraProvider>,
   document.getElementById("root")
