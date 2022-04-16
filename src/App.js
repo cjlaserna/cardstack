@@ -11,7 +11,6 @@ import { Cardset } from "./components/FlashcardComponents/Cardset";
 import { Box } from "@chakra-ui/react";
 import { CardsetFull } from "./components/FlashcardComponents/CardsetFull";
 import { Username } from "./components/Username";
-import { Test } from "./components/Test";
 
 function App() {
   return (
@@ -26,7 +25,6 @@ function App() {
         <Route path="username" element={<Username/>} />
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="cardset/:user/:setname" element={<Cardset/>} />
-        <Route path="test" element={<Test/>} />
         <Route path="cardset/:user/:setname/full" element={<CardsetFull/>} />
       </Routes>
       </AuthProvider>
