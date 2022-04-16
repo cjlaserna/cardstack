@@ -185,6 +185,8 @@ export const CardsetFull = () => {
 
   // keyboard handling
   const handleKeyPress = (e) => {
+    console.log('test')
+    
     switch (e.key) {
       case "ArrowRight":
         handleSliderNext();
@@ -193,6 +195,7 @@ export const CardsetFull = () => {
         handleSliderPrev();
         break;
       case " ":
+        e.preventDefault();
         cardClick();
         break;
       default:
@@ -214,7 +217,7 @@ export const CardsetFull = () => {
 
   // card click
   const cardClick = () => {
-    setIsFlipped(!isFlipped);
+    setIsFlipped((prevState) => !prevState);
   };
 
   // fetch cards once
@@ -238,7 +241,6 @@ export const CardsetFull = () => {
       pb={10}
       overflowX={"clip"}
     >
-      {isFlipped.toString()}
       <Box h={"80vh"}>
         <Box
           p="5"
