@@ -10,6 +10,7 @@ import {
 import React, { useState, useEffect } from "react";
 import ReactCardFlip from "react-card-flip";
 import TeX from "@matejmazur/react-katex";
+import { Untabbable } from "react-untabbable";
 
 export const Card = ({
   front,
@@ -108,9 +109,11 @@ export const Card = ({
               whiteSpace="nowrap"
             >
               Source/Link:{" "}
-              <Link display={"inline-block"} href={link} isExternal>
-                {link}
-              </Link>
+              <Untabbable>
+                <Link display={"inline-block"} href={link} isExternal>
+                  {link}
+                </Link>
+              </Untabbable>
             </Text>
           </Box>
         </Box>
@@ -153,9 +156,11 @@ export const Card = ({
               whiteSpace="nowrap"
             >
               Source/Link:{" "}
-              <Link href={link} isExternal>
-                {link}
-              </Link>
+              <Untabbable>
+                <Link href={link} isExternal>
+                  {link}
+                </Link>
+              </Untabbable>
             </Text>
           </Box>
         </Box>
