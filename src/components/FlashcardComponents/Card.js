@@ -11,8 +11,8 @@ import React, { useState, useEffect } from "react";
 import ReactCardFlip from "react-card-flip";
 import TeX from "@matejmazur/react-katex";
 
-export const Card = ({ front, back, link, block_type, block_content, fontSize }) => {
-  const [isFlipped, setIsFlipped] = useState(false);
+export const Card = ({ front, back, link, block_type, block_content, fontSize, flipped, full }) => {
+  const [isFlipped, setIsFlipped] = useState(flipped);
 
   const cardClick = () => {
     setIsFlipped(!isFlipped);
@@ -57,7 +57,7 @@ export const Card = ({ front, back, link, block_type, block_content, fontSize })
   }, []);
   return (
     <>
-      <ReactCardFlip isFlipped={isFlipped}>
+      <ReactCardFlip isFlipped={full ? flipped : isFlipped}>
         <Box
           display={"flex"}
           flexDirection="column"
@@ -69,9 +69,9 @@ export const Card = ({ front, back, link, block_type, block_content, fontSize })
           minH={"2xs"}
           maxH="sm"
           _hover={{ cursor: "pointer" }}
-          onClick={cardClick}
           overflow="clip"
-        >
+          onClick={cardClick}
+        > 
           <Box flexGrow="1" display={'flex'} justifyContent='center' alignItems={'center'}>
             <Text fontSize={fontSize} textOverflow='clip' overflowWrap={'anywhere'}>{front}</Text>
           </Box>
@@ -133,5 +133,7 @@ Card.defaultProps ={
   link: "",
   block_type: "none",
   block_content: null,
-  fontSize: "1.25em"
+  fontSize: "1.25em",
+  flipped: false,
+  full: false
 }
