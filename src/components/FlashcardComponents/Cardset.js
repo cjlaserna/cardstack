@@ -477,7 +477,6 @@ export const Cardset = () => {
                       block_type={card.block_type}
                       block_content={card.block_content}
                       key={index}
- 
                     />
 
                     {onDel ? (
@@ -572,8 +571,8 @@ export const Cardset = () => {
                         borderWidth="2px"
                         placeholder="Front Card Question"
                         my="1px"
-                        maxLength="40"
                         ref={frontRef}
+                        isRequired
                       />
 
                       <Heading size={"md"} ml="1px" my={1}>
@@ -591,7 +590,6 @@ export const Cardset = () => {
                         borderWidth="2px"
                         placeholder="Back Card Answer"
                         my="1px"
-                        maxLength="75"
                         ref={backRef}
                       />
                     </Box>
