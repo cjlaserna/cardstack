@@ -54,6 +54,7 @@ import TeX from "@matejmazur/react-katex";
 import { colors } from "../../values/colors";
 import Slider from "react-slick";
 import { Slider as RangeSlider } from "@chakra-ui/react";
+import { Share } from "./Share";
 
 export const CardsetFull = () => {
   // states & vars
@@ -66,6 +67,7 @@ export const CardsetFull = () => {
   const [cardStack, setCardStack] = useState(null);
   const [cardOriginal, setCardOriginal] = useState(null);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isFrontBackFlipped, setIsFrontBackFlipped] = useState(false);
 
   // toast
   const toast = useToast();
@@ -79,7 +81,7 @@ export const CardsetFull = () => {
 
   // Refs
   const slider = useRef();
-
+  
   // fetch user
   async function fetchCardset() {
     try {
@@ -164,12 +166,12 @@ export const CardsetFull = () => {
     });
     shuffle(arr);
     setCardStack(arr);
-    setIsFlipped(false);
+    setIsFlipped(isFrontBackFlipped);
   }
 
   function resetCards() {
     setCardStack(cardOriginal);
-    setIsFlipped(false);
+    setIsFlipped(isFrontBackFlipped);
   }
 
   // share card set
@@ -185,8 +187,8 @@ export const CardsetFull = () => {
 
   // keyboard handling
   const handleKeyPress = (e) => {
-    console.log('test')
-    
+    console.log("test");
+
     switch (e.key) {
       case "ArrowRight":
         handleSliderNext();
@@ -202,22 +204,27 @@ export const CardsetFull = () => {
         return null;
     }
   };
-  console.log(isFlipped)
+  console.log(isFlipped);
   // handle slider prev
   const handleSliderPrev = (e) => {
     slider.current.slickPrev();
-    setIsFlipped(false);
-  }
+    setIsFlipped(isFrontBackFlipped);
+  };
 
   // handle slider next
   const handleSliderNext = (e) => {
     slider.current.slickNext();
-    setIsFlipped(false);
-  }
+    setIsFlipped(isFrontBackFlipped);
+  };
 
   // card click
   const cardClick = () => {
     setIsFlipped((prevState) => !prevState);
+  };
+
+  const switchFrontBack = () => {
+    setIsFlipped(!isFrontBackFlipped);
+    setIsFrontBackFlipped(!isFrontBackFlipped);
   };
 
   // fetch cards once
@@ -241,26 +248,53 @@ export const CardsetFull = () => {
       pb={10}
       overflowX={"clip"}
     >
+      <Button
+        colorScheme="blue"
+        variant={"link"}
+        aria-label="Go to Dashboard"
+        size="sm"
+        leftIcon={<ArrowBackIcon />}
+        p="0"
+        as="a"
+        href={`/cardset/${username}/${setTitle}`}
+      >
+        Back to Cardset
+      </Button>
+
+      <Skeleton isLoaded={!isLoading}>
+        <Box margin={3}>
+          <Box display="inline-block" float={"right"} cursor="pointer" ml='3'>
+            <Share username={username} setTitle={setTitle}/>
+          </Box>
+          <Box>
+            <Heading>
+              {" "}
+              {setTitle} by {username}{" "}
+            </Heading>
+          </Box>
+        </Box>
+      </Skeleton>
+
       <Box h={"80vh"}>
         <Box
           p="5"
-          top="8%"
           position={"relative"}
           boxShadow={"md"}
           m="2"
           borderRadius={"10"}
+          borderWidth={'1px'}
         >
-          <Skeleton isLoaded={!isLoading}>
-            {cardStack ? (
-              <Box w="100%" float={"left"}>
-                <Box
-                  w={"100%"}
-                  position="relative"
-                  h="auto"
-                  mx={2}
-                  mt={2}
-                  overflow={"visible"}
-                >
+          {cardStack ? (
+            <Box w="100%" float={"left"}>
+              <Box
+                w={"100%"}
+                position="relative"
+                h="auto"
+                mx={2}
+                mt={2}
+                overflow={"visible"}
+              >
+                <Skeleton isLoaded={!isLoading}>
                   <Slider
                     dots={false}
                     infinite={true}
@@ -273,9 +307,7 @@ export const CardsetFull = () => {
                     ref={slider}
                   >
                     {cardStack.map((card, index) => (
-                      <Box
-                      onClick={cardClick}
-                      >
+                      <Box onClick={cardClick}>
                         <Card
                           front={card.front}
                           back={card.back}
@@ -290,26 +322,35 @@ export const CardsetFull = () => {
                       </Box>
                     ))}
                   </Slider>
-                  <Box my={1}>
-                    <IconButton
-                      icon={<ArrowForwardIcon />}
-                      onClick={handleSliderNext}
-                      display="inline"
-                      float={"right"}
-                    />
-                    <IconButton
-                      icon={<ArrowBackIcon />}
-                      onClick={handleSliderPrev}
-                      display="inline"
-                      float={"left"}
-                    />
-                  </Box>
+                </Skeleton>
+                <Box my={1}>
+                  <IconButton
+                    icon={<ArrowForwardIcon />}
+                    onClick={handleSliderNext}
+                    display="inline"
+                    float={"right"}
+                  />
+                  <IconButton
+                    icon={<ArrowBackIcon />}
+                    onClick={handleSliderPrev}
+                    display="inline"
+                    float={"left"}
+                  />
                 </Box>
               </Box>
-            ) : (
-              " No Cards"
-            )}
-          </Skeleton>
+            </Box>
+          ) : (
+            <Box
+              h={["3xs", "3xs", "2xs", "2xs", "2xs", "sm"]}
+              minH={"2xs"}
+              maxH="sm"
+              display={"flex"}
+              alignItems="center"
+              justifyContent={"center"}
+            >
+              <Heading>No Cards</Heading>
+            </Box>
+          )}
 
           <Box w={"full"} pb={"2.5em"} mx="2">
             <ButtonGroup
@@ -334,11 +375,11 @@ export const CardsetFull = () => {
                     View this Card Set
                   </Button>
                   <Button
-                    colorScheme={"blue"}
-                    variant="outline"
-                    onClick={copyCardSetLink}
+                    colorScheme="blue"
+                    variant={isFrontBackFlipped ? "solid" : "outline"}
+                    onClick={switchFrontBack}
                   >
-                    Share this Card Set
+                    Switch Front and Back
                   </Button>
                   <Button
                     colorScheme={"blue"}
@@ -400,6 +441,7 @@ export const CardsetFull = () => {
           </Box>
         </Box>
       </Box>
+
     </Container>
   );
 };

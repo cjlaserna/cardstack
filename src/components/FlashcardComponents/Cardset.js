@@ -49,6 +49,7 @@ import "katex/dist/katex.min.css";
 import TeX from "@matejmazur/react-katex";
 import { colors } from "../../values/colors";
 import Slider from "react-slick";
+import { Share } from "./Share";
 
 export const Cardset = () => {
   // states & vars
@@ -465,13 +466,7 @@ export const Cardset = () => {
               >
                 Study this set
               </Button>
-              <Button
-                float={"right"}
-                leftIcon={<LinkIcon />}
-                onClick={copyCardSetLink}
-              >
-                Share
-              </Button>
+              <Share/>
             </HStack>
             {/* Main Cards (Default Grid View) */}
             <Box my={5} py={10}>
