@@ -49,6 +49,7 @@ import "katex/dist/katex.min.css";
 import TeX from "@matejmazur/react-katex";
 import { colors } from "../../values/colors";
 import Slider from "react-slick";
+import { Share } from "./Share";
 
 export const Cardset = () => {
   // states & vars
@@ -159,7 +160,7 @@ export const Cardset = () => {
 
     if (cardset) {
       setCardData(cardset);
-      setCardStack(cardset.cards.cards)
+      setCardStack(cardset.cards.cards);
       setIsLoading(false);
     }
 
@@ -355,11 +356,11 @@ export const Cardset = () => {
   function copyCardSetLink() {
     navigator.clipboard.writeText(window.location.href.toString());
     toast({
-      title: 'Link Copied',
-      status: 'success',
-      duration: '1000',
+      title: "Link Copied",
+      status: "success",
+      duration: "1000",
       isClosable: true,
-    })
+    });
   }
 
   // fetch cards once
@@ -392,7 +393,7 @@ export const Cardset = () => {
           size="sm"
           leftIcon={<ArrowBackIcon />}
           p="0"
-          as='a'
+          as="a"
           href="/dashboard"
         >
           Back to Dashboard
@@ -409,40 +410,38 @@ export const Cardset = () => {
                 userID === user.id ? (
                   <Box display="inline-block" float={"right"} cursor="pointer">
                     <Tooltip label="Delete cards from set." placement="left">
-                      <DeleteIcon
-                        mx={2}
-                        onClick={() => {
-                          setOnDel(!onDel);
-                        }}
-                        color={onDel ? "red" : ""}
-                      />
+                      <Box display={'inline-block'}>
+                        <IconButton
+                          aria-label="Delete a card set"
+                          icon={<DeleteIcon />}
+                          mx="1"
+                          onClick={() => {
+                            setOnDel(!onDel);
+                            setDelItems([]);
+                          }}
+                          color={onDel ? "red" : ""}
+                        />
+                      </Box>
                     </Tooltip>
                     <Tooltip
                       label={onDel ? "Disabled." : "Add to this card set."}
                       placement="left"
                     >
-                      <AddIcon
-                        mx={2}
-                        onClick={() => {
-                          if (!onDel) {
+                      <Box display={'inline-block'}>
+                        <IconButton
+                          aria-label="Add new card set"
+                          icon={<AddIcon />}
+                          disabled={onDel ? true : false}
+                          mx={1}
+                          onClick={() => {
                             onAddOpen();
                             setCurrBlock({
                               blockType: "none",
                               blockVal: "",
                             });
-                          } else {
-                            toast({
-                              title: "Feature Disabled.",
-                              description:
-                                "Finish deleting cards before adding new ones.",
-                              status: "error",
-                              duration: 4000,
-                              isClosable: true,
-                            });
-                          }
-                        }}
-                        color={onDel ? "gray" : ""}
-                      />
+                          }}
+                        />
+                      </Box>
                     </Tooltip>
                   </Box>
                 ) : (
@@ -460,10 +459,14 @@ export const Cardset = () => {
             </Box>
 
             <HStack float={"right"}>
-              <Button colorScheme={"blue"} href={`/cardset/${username}/${setTitle}/full`} as="a">Study this set</Button>
-              <Button float={"right"} leftIcon={<LinkIcon />} onClick={copyCardSetLink}>
-                Share
+              <Button
+                colorScheme={"blue"}
+                href={`/cardset/${username}/${setTitle}/full`}
+                as="a"
+              >
+                Study this set
               </Button>
+              <Share/>
             </HStack>
             {/* Main Cards (Default Grid View) */}
             <Box my={5} py={10}>
@@ -477,7 +480,6 @@ export const Cardset = () => {
                       block_type={card.block_type}
                       block_content={card.block_content}
                       key={index}
- 
                     />
 
                     {onDel ? (
@@ -572,8 +574,8 @@ export const Cardset = () => {
                         borderWidth="2px"
                         placeholder="Front Card Question"
                         my="1px"
-                        maxLength="40"
                         ref={frontRef}
+                        isRequired
                       />
 
                       <Heading size={"md"} ml="1px" my={1}>
@@ -591,7 +593,6 @@ export const Cardset = () => {
                         borderWidth="2px"
                         placeholder="Back Card Answer"
                         my="1px"
-                        maxLength="75"
                         ref={backRef}
                       />
                     </Box>
@@ -603,7 +604,12 @@ export const Cardset = () => {
                 </>
 
                 <ButtonGroup w="100%">
-                  <SimpleGrid columns={[2,3,3,3,3,3,3]} spacingX={2} spacing={2} my="3">
+                  <SimpleGrid
+                    columns={[2, 3, 3, 3, 3, 3, 3]}
+                    spacingX={2}
+                    spacing={2}
+                    my="3"
+                  >
                     <Tooltip label="Add an Image.">
                       <Button variant={"solid"} px={3} onClick={onImgOpen}>
                         Image

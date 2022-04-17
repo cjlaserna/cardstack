@@ -54,6 +54,7 @@ import TeX from "@matejmazur/react-katex";
 import { colors } from "../../values/colors";
 import Slider from "react-slick";
 import { Slider as RangeSlider } from "@chakra-ui/react";
+import { Share } from "./Share";
 
 export const CardsetFull = () => {
   // states & vars
@@ -61,10 +62,12 @@ export const CardsetFull = () => {
   const [cardData, setCardData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [userID, setUserID] = useState(null);
-  const [slider, setSlider] = useState(null);
+  // const [slider, setSlider] = useState(null);
   const [fontSize, setFontSize] = useState("1.25em");
   const [cardStack, setCardStack] = useState(null);
   const [cardOriginal, setCardOriginal] = useState(null);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [isFrontBackFlipped, setIsFrontBackFlipped] = useState(false);
 
   // toast
   const toast = useToast();
@@ -76,6 +79,9 @@ export const CardsetFull = () => {
   // shuffle
   var shuffle = require("shuffle-array");
 
+  // Refs
+  const slider = useRef();
+  
   // fetch user
   async function fetchCardset() {
     try {
@@ -160,13 +166,12 @@ export const CardsetFull = () => {
     });
     shuffle(arr);
     setCardStack(arr);
-    console.log(cardStack);
-    console.log(arr);
+    setIsFlipped(isFrontBackFlipped);
   }
 
-  function resetCards(){
+  function resetCards() {
     setCardStack(cardOriginal);
-    console.log(cardOriginal);
+    setIsFlipped(isFrontBackFlipped);
   }
 
   // share card set
@@ -180,10 +185,55 @@ export const CardsetFull = () => {
     });
   }
 
+  // keyboard handling
+  const handleKeyPress = (e) => {
+    console.log("test");
+
+    switch (e.key) {
+      case "ArrowRight":
+        handleSliderNext();
+        break;
+      case "ArrowLeft":
+        handleSliderPrev();
+        break;
+      case " ":
+        e.preventDefault();
+        cardClick();
+        break;
+      default:
+        return null;
+    }
+  };
+  console.log(isFlipped);
+  // handle slider prev
+  const handleSliderPrev = (e) => {
+    slider.current.slickPrev();
+    setIsFlipped(isFrontBackFlipped);
+  };
+
+  // handle slider next
+  const handleSliderNext = (e) => {
+    slider.current.slickNext();
+    setIsFlipped(isFrontBackFlipped);
+  };
+
+  // card click
+  const cardClick = () => {
+    setIsFlipped((prevState) => !prevState);
+  };
+
+  const switchFrontBack = () => {
+    setIsFlipped(!isFrontBackFlipped);
+    setIsFrontBackFlipped(!isFrontBackFlipped);
+  };
+
   // fetch cards once
   useEffect(() => {
     setIsLoading(true);
     fetchCardset();
+    setIsFlipped(false);
+    document.addEventListener("keydown", handleKeyPress);
+    return () => document.removeEventListener("keydown", handleKeyPress);
   }, []);
   return (
     <Container
@@ -198,26 +248,53 @@ export const CardsetFull = () => {
       pb={10}
       overflowX={"clip"}
     >
+      <Button
+        colorScheme="blue"
+        variant={"link"}
+        aria-label="Go to Dashboard"
+        size="sm"
+        leftIcon={<ArrowBackIcon />}
+        p="0"
+        as="a"
+        href={`/cardset/${username}/${setTitle}`}
+      >
+        Back to Cardset
+      </Button>
+
+      <Skeleton isLoaded={!isLoading}>
+        <Box margin={3}>
+          <Box display="inline-block" float={"right"} cursor="pointer" ml='3'>
+            <Share username={username} setTitle={setTitle}/>
+          </Box>
+          <Box>
+            <Heading>
+              {" "}
+              {setTitle} by {username}{" "}
+            </Heading>
+          </Box>
+        </Box>
+      </Skeleton>
+
       <Box h={"80vh"}>
         <Box
           p="5"
-          top="8%"
           position={"relative"}
           boxShadow={"md"}
           m="2"
           borderRadius={"10"}
+          borderWidth={'1px'}
         >
-          <Skeleton isLoaded={!isLoading}>
-            {cardStack ? (
-              <Box w="100%" float={"left"}>
-                <Box
-                  w={"100%"}
-                  position="relative"
-                  h="auto"
-                  mx={2}
-                  mt={2}
-                  overflow={"visible"}
-                >
+          {cardStack ? (
+            <Box w="100%" float={"left"}>
+              <Box
+                w={"100%"}
+                position="relative"
+                h="auto"
+                mx={2}
+                mt={2}
+                overflow={"visible"}
+              >
+                <Skeleton isLoaded={!isLoading}>
                   <Slider
                     dots={false}
                     infinite={true}
@@ -227,10 +304,10 @@ export const CardsetFull = () => {
                     slidesToScroll={1}
                     arrows={false}
                     maxH={"sm"}
-                    ref={(slider) => setSlider(slider)}
+                    ref={slider}
                   >
                     {cardStack.map((card, index) => (
-                      <Box>
+                      <Box onClick={cardClick}>
                         <Card
                           front={card.front}
                           back={card.back}
@@ -239,30 +316,41 @@ export const CardsetFull = () => {
                           block_content={card.block_content}
                           key={index}
                           fontSize={fontSize}
+                          flipped={isFlipped}
+                          full={true}
                         />
                       </Box>
                     ))}
                   </Slider>
-                  <Box my={1}>
-                    <IconButton
-                      icon={<ArrowForwardIcon />}
-                      onClick={() => slider.slickNext()}
-                      display="inline"
-                      float={"right"}
-                    />
-                    <IconButton
-                      icon={<ArrowBackIcon />}
-                      onClick={() => slider.slickPrev()}
-                      display="inline"
-                      float={"left"}
-                    />
-                  </Box>
+                </Skeleton>
+                <Box my={1}>
+                  <IconButton
+                    icon={<ArrowForwardIcon />}
+                    onClick={handleSliderNext}
+                    display="inline"
+                    float={"right"}
+                  />
+                  <IconButton
+                    icon={<ArrowBackIcon />}
+                    onClick={handleSliderPrev}
+                    display="inline"
+                    float={"left"}
+                  />
                 </Box>
               </Box>
-            ) : (
-              " No Cards"
-            )}
-          </Skeleton>
+            </Box>
+          ) : (
+            <Box
+              h={["3xs", "3xs", "2xs", "2xs", "2xs", "sm"]}
+              minH={"2xs"}
+              maxH="sm"
+              display={"flex"}
+              alignItems="center"
+              justifyContent={"center"}
+            >
+              <Heading>No Cards</Heading>
+            </Box>
+          )}
 
           <Box w={"full"} pb={"2.5em"} mx="2">
             <ButtonGroup
@@ -278,11 +366,7 @@ export const CardsetFull = () => {
                 spacing={2}
                 w="full"
               >
-                <SimpleGrid
-                  columns={[1, 1, 2, 2, 2, 2, 2]}
-                  spacing={2}
-                  pt={5}
-                >
+                <SimpleGrid columns={[1, 1, 2, 2, 2, 2, 2]} spacing={2} pt={5}>
                   <Button
                     colorScheme={"blue"}
                     href={`/cardset/${username}/${setTitle}`}
@@ -291,11 +375,11 @@ export const CardsetFull = () => {
                     View this Card Set
                   </Button>
                   <Button
-                    colorScheme={"blue"}
-                    variant="outline"
-                    onClick={copyCardSetLink}
+                    colorScheme="blue"
+                    variant={isFrontBackFlipped ? "solid" : "outline"}
+                    onClick={switchFrontBack}
                   >
-                    Share this Card Set
+                    Switch Front and Back
                   </Button>
                   <Button
                     colorScheme={"blue"}
@@ -357,6 +441,7 @@ export const CardsetFull = () => {
           </Box>
         </Box>
       </Box>
+
     </Container>
   );
 };

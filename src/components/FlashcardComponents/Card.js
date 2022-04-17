@@ -10,9 +10,19 @@ import {
 import React, { useState, useEffect } from "react";
 import ReactCardFlip from "react-card-flip";
 import TeX from "@matejmazur/react-katex";
+import { Untabbable } from "react-untabbable";
 
-export const Card = ({ front, back, link, block_type, block_content, fontSize }) => {
-  const [isFlipped, setIsFlipped] = useState(false);
+export const Card = ({
+  front,
+  back,
+  link,
+  block_type,
+  block_content,
+  fontSize,
+  flipped,
+  full,
+}) => {
+  const [isFlipped, setIsFlipped] = useState(flipped);
 
   const cardClick = () => {
     setIsFlipped(!isFlipped);
@@ -42,8 +52,8 @@ export const Card = ({ front, back, link, block_type, block_content, fontSize })
       case "image":
         return (
           <Box h="300px" overflow="hidden">
-            <Center w={"full"} maxW='400px' overflow="hidden">
-                <Image src={block_content} objectFit="cover" />
+            <Center w={"full"} maxW="400px" overflow="hidden">
+              <Image src={block_content} objectFit="cover" />
             </Center>
           </Box>
         );
@@ -53,11 +63,16 @@ export const Card = ({ front, back, link, block_type, block_content, fontSize })
   }
 
   useEffect(() => {
-    setIsFlipped(false)
+    setIsFlipped(false);
   }, []);
   return (
-    <>
-      <ReactCardFlip isFlipped={isFlipped}>
+    <Box
+      h={["3xs", "3xs", "2xs", "2xs", "2xs", "sm"]}
+      minH={"2xs"}
+      maxH="sm"
+      overflow="clip"
+    >
+      <ReactCardFlip isFlipped={full ? flipped : isFlipped}>
         <Box
           display={"flex"}
           flexDirection="column"
@@ -69,31 +84,43 @@ export const Card = ({ front, back, link, block_type, block_content, fontSize })
           minH={"2xs"}
           maxH="sm"
           _hover={{ cursor: "pointer" }}
+          overflowY="auto"
           onClick={cardClick}
-          overflow="clip"
         >
-          <Box flexGrow="1" display={'flex'} justifyContent='center' alignItems={'center'}>
-            <Text fontSize={fontSize} textOverflow='clip' overflowWrap={'anywhere'}>{front}</Text>
-          </Box>
-
-          <Text
-            isTruncated
-            textOverflow="ellipsis"
-            overflow={"hidden"}
-            whiteSpace="nowrap"
+          <Box
+            flexGrow="1"
+            display={"flex"}
+            justifyContent="center"
+            alignItems={"center"}
           >
-            Source/Link:{" "}
-            <Link display={"inline"} href={link} isExternal>
-              {link}
-            </Link>
-          </Text>
+            <Text
+              fontSize={fontSize}
+              textOverflow="clip"
+              overflowWrap={"anywhere"}
+            >
+              {front}
+            </Text>
+          </Box>
+          <Box display={"inline-block"}>
+            <Text
+              isTruncated
+              textOverflow="ellipsis"
+              overflow={"hidden"}
+              whiteSpace="nowrap"
+            >
+              Source/Link:{" "}
+              <Untabbable>
+                <Link display={"inline-block"} href={link} isExternal>
+                  {link}
+                </Link>
+              </Untabbable>
+            </Text>
+          </Box>
         </Box>
 
         <Box
           display={"flex"}
           flexDirection="column"
-          alignItems={'center'}
-          justifyContent='center'
           boxShadow={"md"}
           rounded="md"
           borderWidth="1px"
@@ -102,36 +129,53 @@ export const Card = ({ front, back, link, block_type, block_content, fontSize })
           minH={"2xs"}
           maxH="sm"
           _hover={{ cursor: "pointer" }}
+          overflowY="auto"
           onClick={cardClick}
-          overflow="clip"
         >
-          <Box flexGrow="1" display={'flex'} justifyContent='center' alignItems={'center'} flexDirection='column'>
-            <Text fontSize={fontSize} wordBreak='break-all' textOverflow={'ellipsis'}>{back}</Text>
-            <Box w={'full'}>{blockRender()}</Box>
-          </Box>
-
-          <Text
-            isTruncated
-            textOverflow="ellipsis"
-            overflow={"hidden"}
-            whiteSpace="nowrap"
+          <Box
+            flexGrow="1"
+            display={"flex"}
+            justifyContent="center"
+            alignItems={"center"}
+            flexDirection="column"
           >
-            Source/Link:{" "}
-            <Link display={"inline"} href={link} isExternal>
-              {link}
-            </Link>
-          </Text>
+            <Text
+              fontSize={fontSize}
+              wordBreak="break-word"
+              textOverflow={"ellipsis"}
+            >
+              {back}
+            </Text>
+            <Box w={"full"}>{blockRender()}</Box>
+          </Box>
+          <Box display={"inline-block"}>
+            <Text
+              isTruncated
+              textOverflow="ellipsis"
+              overflow={"hidden"}
+              whiteSpace="nowrap"
+            >
+              Source/Link:{" "}
+              <Untabbable>
+                <Link href={link} isExternal>
+                  {link}
+                </Link>
+              </Untabbable>
+            </Text>
+          </Box>
         </Box>
       </ReactCardFlip>
-    </>
+    </Box>
   );
 };
 
-Card.defaultProps ={
+Card.defaultProps = {
   front: "No Front Question Found",
   back: "",
   link: "",
   block_type: "none",
   block_content: null,
-  fontSize: "1.25em"
-}
+  fontSize: "1.25em",
+  flipped: false,
+  full: false,
+};
