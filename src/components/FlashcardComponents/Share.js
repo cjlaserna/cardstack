@@ -4,7 +4,6 @@ import {
 	ModalOverlay,
 	ModalContent,
 	ModalHeader,
-	ModalFooter,
 	ModalBody,
 	ModalCloseButton,
 	Button,
@@ -16,8 +15,11 @@ import {
 	VStack,
 	useDisclosure,
 	createIcon,
+	FormControl,
+	FormLabel,
 } from "@chakra-ui/react";
-import { LinkIcon } from "@chakra-ui/icons";
+import emailjs from "@emailjs/browser";
+import { Field, Formik } from "formik";
 
 export const ShareIcon = createIcon({
 	displayName: "ShareIcon",
@@ -26,17 +28,54 @@ export const ShareIcon = createIcon({
 });
 
 export const Share = ({ username, setTitle }) => {
+	// chakra stuff lol
 	const toast = useToast();
-
-	// Use Disclosure for share btn
 	const { isOpen, onOpen, onClose } = useDisclosure();
 
+	// tokens
+	const SERVICE_ID = process.env.REACT_APP_SERVICE_ID;
+	const TEMPLATE_ID = process.env.REACT_APP_TEMPLATE_ID;
+	const PUBLIC_KEY = process.env.REACT_APP_USER_ID;
+
+	// share data for share window
 	const shareData = {
 		title: setTitle,
 		text: `Check out this card set shared by ${username}`,
 		url: window.location.href.toString(),
 	};
 
+	// emailjs send form
+	const sendEmail = (values) => {
+		// params
+		const templateParams = {
+			username: username,
+			cardset_link: window.location.href.toString(),
+			reply_to: values.email.toString(),
+		};
+
+		emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, PUBLIC_KEY).then(
+			(response) => {
+				toast({
+					title: "Email Sent",
+					description: "Your email was sent successfully.",
+					status: "success",
+					duration: 1000,
+					isClosable: true,
+				});
+			},
+			(err) => {
+				toast({
+					title: "Error" + err,
+					description: "Your email failed to send",
+					status: "error",
+					duration: 1000,
+					isClosable: true,
+				});
+			}
+		);
+	};
+
+	// on share (navigator share)
 	const onShare = () => {
 		try {
 			navigator.share(shareData);
@@ -65,10 +104,10 @@ export const Share = ({ username, setTitle }) => {
 	return (
 		<>
 			<IconButton
-              icon={<ShareIcon />}
-              aria-label="Share cardset"
-              onClick={onOpen}
-            />
+				icon={<ShareIcon />}
+				aria-label="Share cardset"
+				onClick={onOpen}
+			/>
 			<Modal isOpen={isOpen} onClose={onClose} size="sm" isCentered>
 				<ModalOverlay />
 				<ModalContent>
@@ -77,11 +116,59 @@ export const Share = ({ username, setTitle }) => {
 					<ModalBody mx={2} mb={5}>
 						<Box w={"full"}>
 							<VStack>
-								<HStack w={"full"}>
-									<Input placeholder="Send to a friend's email" />
-									<Button>Send</Button>
-									{/* doesn't work, fix later */}
-								</HStack>
+								<Box w={"full"}>
+									<Formik
+										initialValues={{
+											email: "",
+										}}
+										onSubmit={(values) => {
+											sendEmail(values);
+										}}
+									>
+										{({ handleSubmit, errors, touched }) => (
+											<form onSubmit={handleSubmit}>
+												<FormControl
+													isInvalid={!!errors.email && touched.email}
+												>
+													<FormLabel
+														htmlFor="input-email"
+														fontSize="sm"
+														display={"none"}
+													>
+														Email
+													</FormLabel>
+
+													<HStack w="full">
+														<Field
+															as={Input}
+															placeholder="Send to a friend's email"
+															name="email"
+															id="input-email"
+															type="email"
+															isRequired
+															validate={(value) => {
+																let error;
+
+																if (!value) {
+																	error = "* Required";
+																} else if (
+																	!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(
+																		value
+																	)
+																) {
+																	error = "Invalid email address";
+																}
+
+																return error;
+															}}
+														/>
+														<Button type="submit">Send</Button>
+													</HStack>
+												</FormControl>
+											</form>
+										)}
+									</Formik>
+								</Box>
 								<HStack w={"full"}>
 									<Input value={window.location.href.toString()} />
 									<Button onClick={copyCardSetLink}>Copy</Button>

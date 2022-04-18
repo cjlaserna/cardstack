@@ -1,13 +1,10 @@
 import {
   Container,
   Box,
-  Text,
-  useColorModeValue,
   Heading,
   VStack,
   Button,
   useToast,
-  FormHelperText,
   FormErrorMessage,
   FormLabel,
   FormControl,
@@ -17,7 +14,7 @@ import {
   Link,
 } from "@chakra-ui/react";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../backend/Auth";
 import { useNavigate } from "react-router-dom";
 import { Formik, Field } from "formik";
@@ -31,7 +28,6 @@ export const Signup = () => {
   const { signUp } = useAuth();
 
   const history = useNavigate();
-  const { signIn } = useAuth();
 
   async function handleSubmit(values) {
     // Get email and password input values

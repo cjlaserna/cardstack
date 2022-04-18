@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
-  Flex,
   Button,
-  IconButton,
-  Container,
-  Stack,
-  ModalOverlay,
-  ModalContent,
-  ModalCloseButton,
-  Modal,
-  ModalHeader,
-  ModalBody,
   useDisclosure,
-  Textarea,
   Text,
   Input,
   Box,
@@ -20,16 +9,6 @@ import {
   FormErrorMessage,
   FormLabel,
   VStack,
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerFooter,
-  DrawerOverlay,
-  DrawerHeader,
-  Alert,
-  AlertIcon,
-  Tooltip,
   Heading,
   useToast,
 } from "@chakra-ui/react";
@@ -48,6 +27,7 @@ export const Username = () => {
     onOpen: onModalOpen,
     onClose: onModalClose,
   } = useDisclosure();
+  
   const { signIn } = useAuth();
   const toast = useToast();
   const history = useNavigate();

@@ -1,447 +1,430 @@
 import {
-  Box,
-  Container,
-  Heading,
-  Text,
-  SimpleGrid,
-  Skeleton,
-  IconButton,
-  Button,
-  Link,
-  Tooltip,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  useDisclosure,
-  ButtonGroup,
-  Img,
-  Input,
-  Textarea,
-  Image,
-  Code,
-  Center,
-  Checkbox,
-  useToast,
-  ScaleFade,
-  Fade,
-  HStack,
-  SliderTrack,
-  SliderFilledTrack,
-  SliderThumb,
-  SliderMark,
+	Box,
+	Container,
+	Heading,
+	Text,
+	SimpleGrid,
+	Skeleton,
+	IconButton,
+	Button,
+	ButtonGroup,
+	useToast,
+	SliderTrack,
+	SliderFilledTrack,
+	SliderThumb,
+	SliderMark,
+	HStack,
 } from "@chakra-ui/react";
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { Card } from "./Card";
-import { useAuth } from "../../backend/Auth";
+import { Card } from "./Card Component/Card";
+
 import { supabase } from "../../backend/supabaseClient";
-import {
-  AddIcon,
-  ArrowBackIcon,
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  EditIcon,
-  LinkIcon,
-  DeleteIcon,
-  ArrowForwardIcon,
-} from "@chakra-ui/icons";
+import { ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
 import "katex/dist/katex.min.css";
-import TeX from "@matejmazur/react-katex";
-import { colors } from "../../values/colors";
 import Slider from "react-slick";
 import { Slider as RangeSlider } from "@chakra-ui/react";
 import { Share } from "./Share";
+import { SpeechBtn } from "./Card Component/SpeechBtn";
+import { SaveBtn } from "./Card Component/SaveBtn";
 
 export const CardsetFull = () => {
-  // states & vars
-  const { user } = useAuth();
-  const [cardData, setCardData] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [userID, setUserID] = useState(null);
-  // const [slider, setSlider] = useState(null);
-  const [fontSize, setFontSize] = useState("1.25em");
-  const [cardStack, setCardStack] = useState(null);
-  const [cardOriginal, setCardOriginal] = useState(null);
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [isFrontBackFlipped, setIsFrontBackFlipped] = useState(false);
+	// states & vars
+	const [cardData, setCardData] = useState(null);
+	const [isLoading, setIsLoading] = useState(false);
+	const [userID, setUserID] = useState(null);
+	const [fontSize, setFontSize] = useState("1.25em");
+	const [cardStack, setCardStack] = useState(null);
+	const [cardOriginal, setCardOriginal] = useState(null);
+	const [isFlipped, setIsFlipped] = useState(false);
+	const [isFrontBackFlipped, setIsFrontBackFlipped] = useState(false);
+	const [currentCardIndex, setCurrentCardIndex] = useState(0);
 
-  // toast
-  const toast = useToast();
+	// toast
+	const toast = useToast();
 
-  // params
-  const username = useParams().user;
-  const setTitle = useParams().setname;
+	// params
+	const username = useParams().user;
+	const setTitle = useParams().setname;
 
-  // shuffle
-  var shuffle = require("shuffle-array");
+	// shuffle
+	var shuffle = require("shuffle-array");
 
-  // Refs
-  const slider = useRef();
-  
-  // fetch user
-  async function fetchCardset() {
-    try {
-      let { data, error, status } = await supabase
-        .from("profiles")
-        .select(`id`)
-        .eq("username", username)
-        .single();
+	// Refs
+	const slider = useRef();
 
-      if (error && status !== 406) {
-        throw error;
-      }
+	// fetch user
+	async function fetchCardset() {
+		try {
+			let { data, error, status } = await supabase
+				.from("profiles")
+				.select(`id`)
+				.eq("username", username)
+				.single();
 
-      if (data) {
-        setUserID(data.id.toString(), setCards(data.id.toString()));
-        console.log(userID);
-      }
-    } catch (error) {
-      toast({
-        title: "Error " + error.status,
-        description: error.message,
-        status: "error",
-        duration: 4000,
-        isClosable: true,
-      });
-    }
-  }
+			if (error && status !== 406) {
+				throw error;
+			}
 
-  // fetch cards from user
-  async function setCards(user) {
-    let { data: cardset, error } = await supabase
-      .from("cardsets")
-      .select("*")
-      .eq("user_id", user)
-      .eq("cardset_name", setTitle)
-      .single();
+			if (data) {
+				setUserID(data.id.toString(), setCards(data.id.toString()));
+				console.log(userID);
+			}
+		} catch (error) {
+			toast({
+				title: "Error " + error.status,
+				description: error.message,
+				status: "error",
+				duration: 4000,
+				isClosable: true,
+			});
+		}
+	}
 
-    if (cardset) {
-      setCardData(cardset);
-      setCardStack(cardset.cards.cards);
-      setCardOriginal(cardset.cards.cards);
-      setIsLoading(false);
-    }
+	// fetch cards from user
+	async function setCards(user) {
+		let { data: cardset, error } = await supabase
+			.from("cardsets")
+			.select("*")
+			.eq("user_id", user)
+			.eq("cardset_name", setTitle)
+			.single();
 
-    if (error) {
-      toast({
-        title: "Error " + error.status,
-        description: error.message,
-        status: "error",
-        duration: 4000,
-        isClosable: true,
-      });
-    }
-    return cardset;
-  }
+		if (cardset) {
+			setCardData(cardset);
+			setCardStack(cardset.cards.cards);
+			setCardOriginal(cardset.cards.cards);
+			setIsLoading(false);
+		}
 
-  // handle slider range
-  function handleSliderChange(value) {
-    switch (value) {
-      case 1:
-        setFontSize("1.25em");
-        break;
-      case 2:
-        setFontSize("2em");
-        break;
-      case 3:
-        setFontSize("2.5em");
-        break;
+		if (error) {
+			toast({
+				title: "Error " + error.status,
+				description: error.message,
+				status: "error",
+				duration: 4000,
+				isClosable: true,
+			});
+		}
+		return cardset;
+	}
 
-      default:
-        setFontSize("1.25em");
-    }
-  }
+	// handle slider range
+	function handleSliderChange(value) {
+		switch (value) {
+			case 1:
+				setFontSize("1.25em");
+				break;
+			case 2:
+				setFontSize("2em");
+				break;
+			case 3:
+				setFontSize("2.5em");
+				break;
 
-  // shuffle cards
-  function shuffleCards() {
-    let object = cardStack;
-    let arr = [];
+			default:
+				setFontSize("1.25em");
+		}
+	}
 
-    object.map((card) => {
-      arr.push(card);
-    });
-    shuffle(arr);
-    setCardStack(arr);
-    setIsFlipped(isFrontBackFlipped);
-  }
+	// shuffle cards
+	function shuffleCards() {
+		let object = cardStack;
+		let arr = [];
 
-  function resetCards() {
-    setCardStack(cardOriginal);
-    setIsFlipped(isFrontBackFlipped);
-  }
+		object.map((card) => {
+			arr.push(card);
+			return arr;
+		});
+		shuffle(arr);
+		setCardStack(arr);
+		setIsFlipped(isFrontBackFlipped);
+		slider.current.slickGoTo(0);
+		setCurrentCardIndex(0);
+	}
 
-  // share card set
-  function copyCardSetLink() {
-    navigator.clipboard.writeText(window.location.href.toString());
-    toast({
-      title: "Link Copied",
-      status: "success",
-      duration: "1000",
-      isClosable: true,
-    });
-  }
+	function resetCards() {
+		setCardStack(cardOriginal);
+		setIsFlipped(isFrontBackFlipped);
+		slider.current.slickGoTo(0);
+		setCurrentCardIndex(0);
+	}
 
-  // keyboard handling
-  const handleKeyPress = (e) => {
-    console.log("test");
+	// keyboard handling
+	const handleKeyPress = (e) => {
+		console.log("test");
 
-    switch (e.key) {
-      case "ArrowRight":
-        handleSliderNext();
-        break;
-      case "ArrowLeft":
-        handleSliderPrev();
-        break;
-      case " ":
-        e.preventDefault();
-        cardClick();
-        break;
-      default:
-        return null;
+		switch (e.key) {
+			case "ArrowRight":
+				handleSliderNext();
+				break;
+			case "ArrowLeft":
+				handleSliderPrev();
+				break;
+			case " ":
+				e.preventDefault();
+				cardClick();
+				break;
+			default:
+				return null;
+		}
+	};
+
+	// handle slider prev
+	const handleSliderPrev = (e) => {
+		slider.current.slickPrev();
+		setIsFlipped(isFrontBackFlipped);
+	};
+
+	// handle slider next
+	const handleSliderNext = (e) => {
+		slider.current.slickNext();
+		setIsFlipped(isFrontBackFlipped);
+	};
+
+	// card click
+	const cardClick = () => {
+		setIsFlipped((prevState) => !prevState);
+	};
+
+	const switchFrontBack = () => {
+		setIsFlipped(!isFrontBackFlipped);
+		setIsFrontBackFlipped(!isFrontBackFlipped);
+	};
+
+	const getCurrCardInfo = () => {
+    const card = cardStack[currentCardIndex];
+    if (!isFlipped) {
+      return card.front
+    } else if (isFlipped) {
+      return card.back
+    } else {
+      return ""
     }
   };
-  console.log(isFlipped);
-  // handle slider prev
-  const handleSliderPrev = (e) => {
-    slider.current.slickPrev();
-    setIsFlipped(isFrontBackFlipped);
-  };
 
-  // handle slider next
-  const handleSliderNext = (e) => {
-    slider.current.slickNext();
-    setIsFlipped(isFrontBackFlipped);
-  };
+	// fetch cards once
+	useEffect(() => {
+		setIsLoading(true);
+		fetchCardset();
+		setIsFlipped(false);
+		document.addEventListener("keydown", handleKeyPress);
+		return () => document.removeEventListener("keydown", handleKeyPress);
+	}, []);
+	return (
+		<Container
+			maxW="100vw"
+			w={[
+				"container.xl",
+				"container.sm",
+				"container.md",
+				"container.lg",
+				"container.xl",
+			]}
+			pb={10}
+			overflowX={"clip"}
+		>
+			<Button
+				colorScheme="blue"
+				variant={"link"}
+				aria-label="Go to Dashboard"
+				size="sm"
+				leftIcon={<ArrowBackIcon />}
+				p="0"
+				as="a"
+				href={`/cardset/${username}/${setTitle}`}
+			>
+				Back to Cardset
+			</Button>
 
-  // card click
-  const cardClick = () => {
-    setIsFlipped((prevState) => !prevState);
-  };
+			<Box h={"80vh"}>
+				<Box px="5" position={"relative"} m="2" borderRadius={"10"}>
+					<Skeleton isLoaded={!isLoading}>
+						<Box>
+							<Heading>
+								{" "}
+								{setTitle} by {username}{" "}
+							</Heading>
+						</Box>
+					</Skeleton>
 
-  const switchFrontBack = () => {
-    setIsFlipped(!isFrontBackFlipped);
-    setIsFrontBackFlipped(!isFrontBackFlipped);
-  };
+					{cardStack ? (
+						<>
+							<HStack gap={"1px"} w="full" justifyContent={"flex-end"}>
+								<SpeechBtn text={getCurrCardInfo()} />
+								<SaveBtn />
+								<Share />
+							</HStack>
+							<Box w="100%" float={"left"}>
+								<Box
+									w={"100%"}
+									position="relative"
+									h="auto"
+									mx={2}
+									mt={2}
+									overflow={"visible"}
+								>
+									<Skeleton isLoaded={!isLoading}>
+										<Slider
+											dots={false}
+											infinite={true}
+											accessibility
+											speed="300"
+											slidesToShow={1}
+											slidesToScroll={1}
+											arrows={false}
+											maxH={"sm"}
+											ref={slider}
+											afterChange={(current) => setCurrentCardIndex(current)}
+										>
+											{cardStack.map((card, index) => (
+												<Box>
+													<Box onClick={cardClick}>
+														<Card
+															front={card.front}
+															back={card.back}
+															link={card.link}
+															block_type={card.block_type}
+															block_content={card.block_content}
+															key={index}
+															fontSize={fontSize}
+															flipped={isFlipped}
+															full={true}
+														/>
+													</Box>
+												</Box>
+											))}
+										</Slider>
+									</Skeleton>
+									<Box my={2} w="full">
+										<HStack
+											w="full"
+											display={"flex"}
+											justifyContent="center"
+											alignItems={"center"}
+										>
+											<IconButton
+												icon={<ArrowBackIcon />}
+												onClick={handleSliderPrev}
+												display="inline"
+											/>
+											<Text flexGrow={1} textAlign="center" fontSize={"1.25em"}>
+												{" "}
+												{currentCardIndex + 1} / {cardStack.length}{" "}
+											</Text>
+											<IconButton
+												icon={<ArrowForwardIcon />}
+												onClick={handleSliderNext}
+												display="inline"
+											/>
+										</HStack>
+									</Box>
+								</Box>
+							</Box>
+						</>
+					) : (
+						<Box
+							h={["3xs", "3xs", "2xs", "2xs", "2xs", "sm"]}
+							minH={"2xs"}
+							maxH="sm"
+							display={"flex"}
+							alignItems="center"
+							justifyContent={"center"}
+						>
+							<Heading>No Cards</Heading>
+						</Box>
+					)}
 
-  // fetch cards once
-  useEffect(() => {
-    setIsLoading(true);
-    fetchCardset();
-    setIsFlipped(false);
-    document.addEventListener("keydown", handleKeyPress);
-    return () => document.removeEventListener("keydown", handleKeyPress);
-  }, []);
-  return (
-    <Container
-      maxW="100vw"
-      w={[
-        "container.xl",
-        "container.sm",
-        "container.md",
-        "container.lg",
-        "container.xl",
-      ]}
-      pb={10}
-      overflowX={"clip"}
-    >
-      <Button
-        colorScheme="blue"
-        variant={"link"}
-        aria-label="Go to Dashboard"
-        size="sm"
-        leftIcon={<ArrowBackIcon />}
-        p="0"
-        as="a"
-        href={`/cardset/${username}/${setTitle}`}
-      >
-        Back to Cardset
-      </Button>
+					<Box w={"full"} pb={"2.5em"} mx="2">
+						<ButtonGroup
+							my={5}
+							w={"full"}
+							display="flex"
+							justifyContent={"center"}
+							alignItems="center"
+						>
+							<SimpleGrid
+								columns={[1, 1, 1, 2, 2, 2]}
+								spacingX={2}
+								spacing={2}
+								w="full"
+							>
+								<SimpleGrid columns={[1, 1, 2, 2, 2, 2, 2]} spacing={2} pt={5}>
+									<Button
+										colorScheme={"blue"}
+										href={`/cardset/${username}/${setTitle}`}
+										as="a"
+									>
+										View this Card Set
+									</Button>
+									<Button
+										colorScheme="blue"
+										variant={isFrontBackFlipped ? "solid" : "outline"}
+										onClick={switchFrontBack}
+									>
+										Switch Front and Back
+									</Button>
+									<Button
+										colorScheme={"blue"}
+										variant="outline"
+										onClick={shuffleCards}
+									>
+										Shuffle Card Set
+										{/* Doesnt work, bad, fix later */}
+									</Button>
+									<Button
+										colorScheme={"blue"}
+										variant="outline"
+										onClick={resetCards}
+									>
+										Reset Shuffle
+									</Button>
+								</SimpleGrid>
 
-      <Skeleton isLoaded={!isLoading}>
-        <Box margin={3}>
-          <Box display="inline-block" float={"right"} cursor="pointer" ml='3'>
-            <Share username={username} setTitle={setTitle}/>
-          </Box>
-          <Box>
-            <Heading>
-              {" "}
-              {setTitle} by {username}{" "}
-            </Heading>
-          </Box>
-        </Box>
-      </Skeleton>
-
-      <Box h={"80vh"}>
-        <Box
-          p="5"
-          position={"relative"}
-          boxShadow={"md"}
-          m="2"
-          borderRadius={"10"}
-          borderWidth={'1px'}
-        >
-          {cardStack ? (
-            <Box w="100%" float={"left"}>
-              <Box
-                w={"100%"}
-                position="relative"
-                h="auto"
-                mx={2}
-                mt={2}
-                overflow={"visible"}
-              >
-                <Skeleton isLoaded={!isLoading}>
-                  <Slider
-                    dots={false}
-                    infinite={true}
-                    accessibility
-                    speed="300"
-                    slidesToShow={1}
-                    slidesToScroll={1}
-                    arrows={false}
-                    maxH={"sm"}
-                    ref={slider}
-                  >
-                    {cardStack.map((card, index) => (
-                      <Box onClick={cardClick}>
-                        <Card
-                          front={card.front}
-                          back={card.back}
-                          link={card.link}
-                          block_type={card.block_type}
-                          block_content={card.block_content}
-                          key={index}
-                          fontSize={fontSize}
-                          flipped={isFlipped}
-                          full={true}
-                        />
-                      </Box>
-                    ))}
-                  </Slider>
-                </Skeleton>
-                <Box my={1}>
-                  <IconButton
-                    icon={<ArrowForwardIcon />}
-                    onClick={handleSliderNext}
-                    display="inline"
-                    float={"right"}
-                  />
-                  <IconButton
-                    icon={<ArrowBackIcon />}
-                    onClick={handleSliderPrev}
-                    display="inline"
-                    float={"left"}
-                  />
-                </Box>
-              </Box>
-            </Box>
-          ) : (
-            <Box
-              h={["3xs", "3xs", "2xs", "2xs", "2xs", "sm"]}
-              minH={"2xs"}
-              maxH="sm"
-              display={"flex"}
-              alignItems="center"
-              justifyContent={"center"}
-            >
-              <Heading>No Cards</Heading>
-            </Box>
-          )}
-
-          <Box w={"full"} pb={"2.5em"} mx="2">
-            <ButtonGroup
-              my={5}
-              w={"full"}
-              display="flex"
-              justifyContent={"center"}
-              alignItems="center"
-            >
-              <SimpleGrid
-                columns={[1, 1, 1, 2, 2, 2]}
-                spacingX={2}
-                spacing={2}
-                w="full"
-              >
-                <SimpleGrid columns={[1, 1, 2, 2, 2, 2, 2]} spacing={2} pt={5}>
-                  <Button
-                    colorScheme={"blue"}
-                    href={`/cardset/${username}/${setTitle}`}
-                    as="a"
-                  >
-                    View this Card Set
-                  </Button>
-                  <Button
-                    colorScheme="blue"
-                    variant={isFrontBackFlipped ? "solid" : "outline"}
-                    onClick={switchFrontBack}
-                  >
-                    Switch Front and Back
-                  </Button>
-                  <Button
-                    colorScheme={"blue"}
-                    variant="outline"
-                    onClick={shuffleCards}
-                  >
-                    Shuffle Card Set
-                  </Button>
-                  <Button
-                    colorScheme={"blue"}
-                    variant="outline"
-                    onClick={resetCards}
-                  >
-                    Reset Shuffle
-                  </Button>
-                </SimpleGrid>
-
-                <Box w={"100%"} pt={5}>
-                  <Box float={"right"} mr={"25%"} w="50%">
-                    <Text>Change Font Size</Text>
-                    <RangeSlider
-                      defaultValue={1}
-                      min={1}
-                      max={3}
-                      step={1}
-                      onChange={(val) => handleSliderChange(val)}
-                    >
-                      <Box
-                        display={"flex"}
-                        alignItems="center"
-                        position={"relative"}
-                        bottom={"-2em"}
-                      >
-                        <SliderMark
-                          value={1}
-                          mt="1"
-                          ml="-2.5"
-                          fontSize="1.25em"
-                        >
-                          A
-                        </SliderMark>
-                        <SliderMark value={2} mt="1" ml="-2.5" fontSize="2em">
-                          A
-                        </SliderMark>
-                        <SliderMark value={3} mt="1" ml="-2.5" fontSize="2.5em">
-                          A
-                        </SliderMark>
-                      </Box>
-                      <SliderTrack bg="blue.100">
-                        <Box position="relative" right={10} />
-                        <SliderFilledTrack bg="teal" />
-                      </SliderTrack>
-                      <SliderThumb boxSize={6} />
-                    </RangeSlider>
-                  </Box>
-                </Box>
-              </SimpleGrid>
-            </ButtonGroup>
-          </Box>
-        </Box>
-      </Box>
-
-    </Container>
-  );
+								<Box w={"100%"} pt={5}>
+									<Box float={"right"} mr={"25%"} w="50%">
+										<Text>Change Font Size</Text>
+										<RangeSlider
+											defaultValue={1}
+											min={1}
+											max={3}
+											step={1}
+											onChange={(val) => handleSliderChange(val)}
+										>
+											<Box
+												display={"flex"}
+												alignItems="center"
+												position={"relative"}
+												bottom={"-2em"}
+											>
+												<SliderMark
+													value={1}
+													mt="1"
+													ml="-2.5"
+													fontSize="1.25em"
+												>
+													A
+												</SliderMark>
+												<SliderMark value={2} mt="1" ml="-2.5" fontSize="2em">
+													A
+												</SliderMark>
+												<SliderMark value={3} mt="1" ml="-2.5" fontSize="2.5em">
+													A
+												</SliderMark>
+											</Box>
+											<SliderTrack bg="blue.100">
+												<Box position="relative" right={10} />
+												<SliderFilledTrack bg="teal" />
+											</SliderTrack>
+											<SliderThumb boxSize={6} />
+										</RangeSlider>
+									</Box>
+								</Box>
+							</SimpleGrid>
+						</ButtonGroup>
+					</Box>
+				</Box>
+			</Box>
+		</Container>
+	);
 };

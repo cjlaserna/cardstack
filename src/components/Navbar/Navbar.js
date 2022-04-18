@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Flex,
   Button,
@@ -8,15 +8,11 @@ import {
   Stack,
   ModalOverlay,
   ModalContent,
-  ModalCloseButton,
   Modal,
   ModalHeader,
   ModalBody,
   useDisclosure,
-  Textarea,
-  Text,
   Input,
-  Box,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -38,7 +34,7 @@ import { Colormodebtn } from "../ToggleColorMode/Colormodebtn";
 import { useAuth } from "../../backend/Auth";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../backend/supabaseClient";
-import { Formik, Field, setIn } from "formik";
+import { Formik, Field } from "formik";
 import { InfoIcon } from "@chakra-ui/icons";
 import { useToast } from "@chakra-ui/react";
 

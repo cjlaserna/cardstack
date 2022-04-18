@@ -32,23 +32,18 @@ import {
 } from "@chakra-ui/react";
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { Card } from "./Card";
+import { Card } from "./Card Component/Card";
 import { useAuth } from "../../backend/Auth";
 import { supabase } from "../../backend/supabaseClient";
 import {
   AddIcon,
   ArrowBackIcon,
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  EditIcon,
   LinkIcon,
   DeleteIcon,
-  ArrowForwardIcon,
 } from "@chakra-ui/icons";
 import "katex/dist/katex.min.css";
 import TeX from "@matejmazur/react-katex";
 import { colors } from "../../values/colors";
-import Slider from "react-slick";
 import { Share } from "./Share";
 
 export const Cardset = () => {
@@ -58,7 +53,6 @@ export const Cardset = () => {
   const [cardStack, setCardStack] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [userID, setUserID] = useState(null);
-  const [slider, setSlider] = useState(null);
 
   // toast
   const toast = useToast();
