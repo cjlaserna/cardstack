@@ -11,6 +11,7 @@ import React, { useState, useEffect } from "react";
 import ReactCardFlip from "react-card-flip";
 import TeX from "@matejmazur/react-katex";
 import { Untabbable } from "react-untabbable";
+import { SpeechBtn } from "./SpeechBtn";
 
 export const Card = ({
   front,

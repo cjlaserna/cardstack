@@ -8,7 +8,6 @@ import { AuthProvider } from "./backend/Auth";
 import { Signup } from "./components/Signup";
 import { Dashboard } from "./components/Dashboard";
 import { Cardset } from "./components/FlashcardComponents/Cardset";
-import { Box } from "@chakra-ui/react";
 import { CardsetFull } from "./components/FlashcardComponents/CardsetFull";
 import { Username } from "./components/Username";
 

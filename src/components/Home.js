@@ -1,28 +1,22 @@
 import {
   Container,
   Heading,
-  Stack,
   useColorModeValue,
   Text,
   Box,
-  AspectRatio,
   SimpleGrid,
   Img,
   Button,
-  Link,
   ButtonGroup,
 } from "@chakra-ui/react";
 import React from "react";
-import { LovingDoodle } from "react-open-doodles";
 import { colors } from "../values/colors";
 import Spline from "@splinetool/react-spline";
 import Calculator from "../assets/calculator.png";
 import Code from "../assets/code.png";
-import { ExternalLinkIcon } from "@chakra-ui/icons";
 import { Footer } from "./Footer/Footer";
 
 export const Home = () => {
-  const ink = useColorModeValue("black", "#d3d4e2");
   return (
     <>
       <Container

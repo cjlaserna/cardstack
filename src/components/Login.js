@@ -1,7 +1,6 @@
 import {
   Container,
   Box,
-  useColorModeValue,
   Heading,
   VStack,
   Button,
@@ -15,7 +14,7 @@ import {
   Link,
 } from "@chakra-ui/react";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../backend/Auth";
 import { useNavigate } from "react-router-dom";
 import { Field, Formik } from "formik";
@@ -25,9 +24,6 @@ export const Login = () => {
   const handleClick = () => setShow(!show);
 
   const toast = useToast();
-
-  const emailRef = useRef();
-  const passwordRef = useRef();
 
   // Get signUp function from the auth context
   const { signIn } = useAuth();

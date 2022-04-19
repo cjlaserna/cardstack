@@ -1,10 +1,9 @@
-import { AddIcon, ChatIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
+import { AddIcon, DeleteIcon, } from "@chakra-ui/icons";
 import {
   Box,
   Container,
   Heading,
   IconButton,
-  Link,
   SimpleGrid,
   Text,
   Button,
@@ -14,11 +13,9 @@ import {
   ModalCloseButton,
   ModalContent,
   ModalOverlay,
-  InputGroup,
   Modal,
   useDisclosure,
   FormControl,
-  FormLabel,
   Tooltip,
   Textarea,
   FormErrorMessage,
@@ -28,7 +25,6 @@ import {
   Checkbox,
   ScaleFade,
   ModalFooter,
-  Fade,
   Collapse,
   useMediaQuery,
   FormHelperText,
