@@ -37,7 +37,7 @@ export const SaveBtn = ({ card, setName, setCreator, user }) => {
 
 	async function starCard() {
 		// if there are cards starred, fetch cards, add to it, send back new cards
-		if (starred !== null) {
+		if (starred.length() !== 0) {
 			// check if the card is already starred
 			const isCardInSet = checkIfStarred();
 
