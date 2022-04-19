@@ -18,9 +18,7 @@ export async function fetchStarred(user, setName, setCreator) {
 		.single();
 
 	if (error) {
-		const cards = `{"cards":[]}`;
-		const cardsObj = JSON.parse(cards);
-		return cardsObj.cards;
+		return null;
 	} else {
 		return starred.cards.cards;
 	}
@@ -37,7 +35,7 @@ export const SaveBtn = ({ card, setName, setCreator, user }) => {
 
 	async function starCard() {
 		// if there are cards starred, fetch cards, add to it, send back new cards
-		if (starred !== JSON.parse(`[]`)) {
+		if (starred !== null) {
 			// check if the card is already starred
 			const isCardInSet = checkIfStarred();
 
@@ -163,7 +161,7 @@ export const SaveBtn = ({ card, setName, setCreator, user }) => {
 				<IconButton isLoading />
 			) : (
 				<IconButton
-					icon={<IoIosStar color={checkIfStarred() ? "#f4bd55" : ink} />}
+					icon={<IoIosStar color={starred ? checkIfStarred() ? "#f4bd55" : ink : ink} />}
 					onClick={starCard}
 				/>
 			)}
