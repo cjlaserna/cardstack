@@ -31,13 +31,13 @@ export const SaveBtn = ({ card, setName, setCreator, user }) => {
 	const [starred, setStarred] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
 
-	// chakra stuff lol
+	// chakra stuff lola
 	const toast = useToast();
 	const ink = useColorModeValue("gray", "lightgray");
 
 	async function starCard() {
 		// if there are cards starred, fetch cards, add to it, send back new cards
-		if (starred !== []) {
+		if (starred !== JSON.parse(`[]`)) {
 			// check if the card is already starred
 			const isCardInSet = checkIfStarred();
 
