@@ -28,7 +28,7 @@ import Slider from "react-slick";
 import { Slider as RangeSlider } from "@chakra-ui/react";
 import { Share } from "./Share";
 import { SpeechBtn } from "./Card Component/SpeechBtn";
-import { SaveBtn } from "./Card Component/SaveBtn";
+import { fetchStarred, SaveBtn } from "./Card Component/SaveBtn";
 import { useAuth } from "../../backend/Auth";
 
 export const CardsetFull = () => {
@@ -42,6 +42,7 @@ export const CardsetFull = () => {
 	const [isFlipped, setIsFlipped] = useState(false);
 	const [isFrontBackFlipped, setIsFrontBackFlipped] = useState(false);
 	const [currentCardIndex, setCurrentCardIndex] = useState(0);
+	const [isStarredOnly, setIsStarredOnly] = useState(false);
 
 	// toast
 	const toast = useToast();
@@ -152,6 +153,7 @@ export const CardsetFull = () => {
 	function resetCards() {
 		setCardStack(cardOriginal);
 		setIsFlipped(isFrontBackFlipped);
+		setIsStarredOnly(false);
 		slider.current.slickGoTo(0);
 		setCurrentCardIndex(0);
 	}
@@ -199,12 +201,16 @@ export const CardsetFull = () => {
 	};
 
 	const getCurrCardInfo = () => {
-		const card = cardStack[currentCardIndex];
-		if (!isFlipped) {
-			return card.front;
-		} else if (isFlipped) {
-			return card.back;
-		} else {
+		try {
+			const card = cardStack[currentCardIndex];
+			if (!isFlipped) {
+				return card.front;
+			} else if (isFlipped) {
+				return card.back;
+			} else {
+				return "";
+			}
+		} catch (error) {
 			return "";
 		}
 	};
@@ -219,6 +225,7 @@ export const CardsetFull = () => {
 		setIsLoading(true);
 		fetchCardset();
 		setIsFlipped(false);
+		setIsStarredOnly(false);
 		setCurrentCardIndex(0);
 		document.addEventListener("keydown", handleKeyPress);
 		return () => document.removeEventListener("keydown", handleKeyPress);
@@ -262,7 +269,7 @@ export const CardsetFull = () => {
 						cardStack.length !== 0 ? (
 							<>
 								<SimpleGrid columns={2} w="full" minH={10} mx={2}>
-									<Box h={10}>
+									<Box h={10} mr='10'>
 										<Text fontWeight="medium"> Progress: </Text>
 										<Progress value={getProgress()} />
 									</Box>
@@ -326,33 +333,6 @@ export const CardsetFull = () => {
 												))}
 											</Slider>
 										</Skeleton>
-										<Box my={2} w="full">
-											<HStack
-												w="full"
-												display={"flex"}
-												justifyContent="center"
-												alignItems={"center"}
-											>
-												<IconButton
-													icon={<ArrowBackIcon />}
-													onClick={handleSliderPrev}
-													display="inline"
-												/>
-												<Text
-													flexGrow={1}
-													textAlign="center"
-													fontSize={"1.25em"}
-												>
-													{" "}
-													{currentCardIndex + 1} / {cardStack.length}{" "}
-												</Text>
-												<IconButton
-													icon={<ArrowForwardIcon />}
-													onClick={handleSliderNext}
-													display="inline"
-												/>
-											</HStack>
-										</Box>
 									</Box>
 								</Box>
 							</>
@@ -382,11 +362,33 @@ export const CardsetFull = () => {
 								alignItems="center"
 								justifyContent={"center"}
 							>
-								<Spinner size={'lg'}/>
+								<Spinner size={"lg"} />
 							</Box>
 						</>
 					)}
 
+					<Box my={2} mx={2} w="full">
+						<HStack
+							w="full"
+							display={"flex"}
+							justifyContent="center"
+							alignItems={"center"}
+						>
+							<IconButton
+								icon={<ArrowBackIcon />}
+								onClick={handleSliderPrev}
+								display="inline"
+							/>
+							<Text flexGrow={1} textAlign="center" fontSize={"1.25em"}>
+							{ cardStack ? `${currentCardIndex + 1} / ${cardStack.length}` : "0/0"}
+							</Text>
+							<IconButton
+								icon={<ArrowForwardIcon />}
+								onClick={handleSliderNext}
+								display="inline"
+							/>
+						</HStack>
+					</Box>
 					<Box w={"full"} pb={"2.5em"} mx="2">
 						<ButtonGroup
 							my={5}
@@ -402,13 +404,30 @@ export const CardsetFull = () => {
 								w="full"
 							>
 								<SimpleGrid columns={[1, 1, 2, 2, 2, 2, 2]} spacing={2} pt={5}>
-									<Button
-										colorScheme={"blue"}
-										href={`/cardset/${username}/${setTitle}`}
-										as="a"
-									>
-										View All Cards
-									</Button>
+									{user ? (
+										<Button
+											colorScheme={"blue"}
+											variant={isStarredOnly ? "solid" : "outline"}
+											onClick={
+												isStarredOnly
+													? () => {
+															resetCards();
+													  }
+													: () => {
+															fetchStarred(user, setTitle, username).then(
+																(value) => {
+																	setCardStack(value);
+																	setIsStarredOnly(true);
+																}
+															);
+													  }
+											}
+										>
+											Starred Cards Only
+										</Button>
+									) : (
+										""
+									)}
 									<Button
 										colorScheme="blue"
 										variant={isFrontBackFlipped ? "solid" : "outline"}
@@ -429,7 +448,7 @@ export const CardsetFull = () => {
 										variant="outline"
 										onClick={resetCards}
 									>
-										Reset Shuffle
+										Reset Cards
 									</Button>
 								</SimpleGrid>
 

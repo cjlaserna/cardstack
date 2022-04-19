@@ -1,34 +1,37 @@
-import { Fade, IconButton, useColorModeValue, useToast } from "@chakra-ui/react";
+import {
+	Fade,
+	IconButton,
+	useColorModeValue,
+	useToast,
+} from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { IoIosStarOutline, IoIosStar } from "react-icons/io";
 import { supabase } from "../../../backend/supabaseClient";
+
+export async function fetchStarred(user, setName, setCreator) {
+	let { data: starred, error } = await supabase
+		.from("starred")
+		.select("*")
+		.eq("user_id", user.id)
+		.eq("cardset_name", setName)
+		.eq("cardset_creator", setCreator)
+		.single();
+
+	if (error) {
+		return null;
+	} else {
+		return starred.cards.cards;
+	}
+}
 
 export const SaveBtn = ({ card, setName, setCreator, user }) => {
 	// states
 	const [starred, setStarred] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
-	
+
 	// chakra stuff lol
 	const toast = useToast();
-	const ink = useColorModeValue('gray', "lightgray")
-
-	// check if they already have starred cards in this set and if card is already in set
-	async function fetchStarred() {
-		let { data: starred, error } = await supabase
-			.from("starred")
-			.select("*")
-			.eq("user_id", user.id)
-			.eq("cardset_name", setName)
-			.eq("cardset_creator", setCreator)
-			.single();
-
-		if (error) {
-			setStarred(null);
-		} else {
-			setStarred(starred.cards.cards);
-		}
-		return starred.cards.cards;
-	}
+	const ink = useColorModeValue("gray", "lightgray");
 
 	async function starCard() {
 		// if there are cards starred, fetch cards, add to it, send back new cards
@@ -40,6 +43,7 @@ export const SaveBtn = ({ card, setName, setCreator, user }) => {
 				// if card is starred, unstar card
 				var arr = [];
 				var stringArr = [];
+				console.log(starred)
 				starred.map((card) => {
 					arr.push(card);
 					stringArr.push(JSON.stringify(card));
@@ -47,7 +51,7 @@ export const SaveBtn = ({ card, setName, setCreator, user }) => {
 				});
 
 				arr.splice(stringArr.indexOf(JSON.stringify(card)), 1);
-				const cards = `{"cards": [${JSON.stringify(arr)}]}`;
+				const cards = `{"cards": ${JSON.stringify(arr)}}`;
 				const cardsObj = JSON.parse(cards);
 
 				try {
@@ -62,7 +66,7 @@ export const SaveBtn = ({ card, setName, setCreator, user }) => {
 					if (error) {
 						throw error;
 					} else {
-						fetchStarred();
+						setStarred(cardsObj.cards);
 					}
 				} catch (error) {
 					toast({
@@ -76,6 +80,7 @@ export const SaveBtn = ({ card, setName, setCreator, user }) => {
 			} else {
 				// if card is not starred, star card
 				var arr = [];
+				console.log(starred)
 				starred.map((card) => {
 					arr.push(card);
 					return arr;
@@ -99,7 +104,7 @@ export const SaveBtn = ({ card, setName, setCreator, user }) => {
 					if (error) {
 						throw error;
 					} else {
-						fetchStarred();
+						setStarred(cardsObj.cards);
 					}
 				} catch (error) {
 					toast({
@@ -129,12 +134,14 @@ export const SaveBtn = ({ card, setName, setCreator, user }) => {
 			else {
 				console.log(error);
 			}
-			fetchStarred();
+			setStarred(cardsObj.cards);
 		}
 	}
 
 	// check if card is in starred
 	const checkIfStarred = () => {
+		console.log(typeof starred)
+		console.log(starred)
 		var arr = [];
 		starred.map((card) => {
 			arr.push(JSON.stringify(card));
@@ -143,7 +150,10 @@ export const SaveBtn = ({ card, setName, setCreator, user }) => {
 	};
 	useEffect(() => {
 		setIsLoading(true);
-		fetchStarred().then(() => setIsLoading(false));
+		fetchStarred(user, setName, setCreator).then((value) => {
+			setStarred(value);
+			setIsLoading(false);
+		});
 	}, []);
 	return (
 		<>
