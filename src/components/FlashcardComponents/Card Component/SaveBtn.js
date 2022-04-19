@@ -18,7 +18,9 @@ export async function fetchStarred(user, setName, setCreator) {
 		.single();
 
 	if (error) {
-		return null;
+		const cards = `{"cards":[]}`;
+		const cardsObj = JSON.parse(cards);
+		return cardsObj.cards;
 	} else {
 		return starred.cards.cards;
 	}
