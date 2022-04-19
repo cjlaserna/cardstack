@@ -418,6 +418,7 @@ export const CardsetFull = () => {
 																(value) => {
 																	setCardStack(value);
 																	setIsStarredOnly(true);
+																	slider.current.slickGoTo(0);
 																}
 															);
 													  }
