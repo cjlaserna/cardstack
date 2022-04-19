@@ -14,6 +14,8 @@ import {
 	SliderThumb,
 	SliderMark,
 	HStack,
+	Progress,
+	Spinner,
 } from "@chakra-ui/react";
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
@@ -27,6 +29,7 @@ import { Slider as RangeSlider } from "@chakra-ui/react";
 import { Share } from "./Share";
 import { SpeechBtn } from "./Card Component/SpeechBtn";
 import { SaveBtn } from "./Card Component/SaveBtn";
+import { useAuth } from "../../backend/Auth";
 
 export const CardsetFull = () => {
 	// states & vars
@@ -52,6 +55,9 @@ export const CardsetFull = () => {
 
 	// Refs
 	const slider = useRef();
+
+	// current user
+	const { user } = useAuth();
 
 	// fetch user
 	async function fetchCardset() {
@@ -193,21 +199,27 @@ export const CardsetFull = () => {
 	};
 
 	const getCurrCardInfo = () => {
-    const card = cardStack[currentCardIndex];
-    if (!isFlipped) {
-      return card.front
-    } else if (isFlipped) {
-      return card.back
-    } else {
-      return ""
-    }
-  };
+		const card = cardStack[currentCardIndex];
+		if (!isFlipped) {
+			return card.front;
+		} else if (isFlipped) {
+			return card.back;
+		} else {
+			return "";
+		}
+	};
 
+	const getProgress = () => {
+		const progress = ((currentCardIndex + 1) / cardStack.length) * 100;
+		console.log(progress);
+		return progress;
+	};
 	// fetch cards once
 	useEffect(() => {
 		setIsLoading(true);
 		fetchCardset();
 		setIsFlipped(false);
+		setCurrentCardIndex(0);
 		document.addEventListener("keydown", handleKeyPress);
 		return () => document.removeEventListener("keydown", handleKeyPress);
 	}, []);
@@ -234,105 +246,145 @@ export const CardsetFull = () => {
 				as="a"
 				href={`/cardset/${username}/${setTitle}`}
 			>
-				Back to Cardset
+				View All Cards
 			</Button>
 
 			<Box h={"80vh"}>
 				<Box px="5" position={"relative"} m="2" borderRadius={"10"}>
-					<Skeleton isLoaded={!isLoading}>
-						<Box>
-							<Heading>
-								{" "}
-								{setTitle} by {username}{" "}
-							</Heading>
-						</Box>
-					</Skeleton>
+					<Box mx={2} my={2}>
+						<Heading>
+							{" "}
+							{setTitle} by {username}{" "}
+						</Heading>
+					</Box>
 
 					{cardStack ? (
-						<>
-							<HStack gap={"1px"} w="full" justifyContent={"flex-end"}>
-								<SpeechBtn text={getCurrCardInfo()} />
-								<SaveBtn />
-								<Share />
-							</HStack>
-							<Box w="100%" float={"left"}>
-								<Box
-									w={"100%"}
-									position="relative"
-									h="auto"
-									mx={2}
-									mt={2}
-									overflow={"visible"}
-								>
-									<Skeleton isLoaded={!isLoading}>
-										<Slider
-											dots={false}
-											infinite={true}
-											accessibility
-											speed="300"
-											slidesToShow={1}
-											slidesToScroll={1}
-											arrows={false}
-											maxH={"sm"}
-											ref={slider}
-											afterChange={(current) => setCurrentCardIndex(current)}
-										>
-											{cardStack.map((card, index) => (
-												<Box>
-													<Box onClick={cardClick}>
-														<Card
-															front={card.front}
-															back={card.back}
-															link={card.link}
-															block_type={card.block_type}
-															block_content={card.block_content}
-															key={index}
-															fontSize={fontSize}
-															flipped={isFlipped}
-															full={true}
-														/>
+						cardStack.length !== 0 ? (
+							<>
+								<SimpleGrid columns={2} w="full" minH={10} mx={2}>
+									<Box h={10}>
+										<Text fontWeight="medium"> Progress: </Text>
+										<Progress value={getProgress()} />
+									</Box>
+									<HStack
+										gap={"1px"}
+										display={"flex"}
+										justifyContent="flex-end"
+									>
+										<SpeechBtn text={getCurrCardInfo()} />
+										{user ? (
+											<SaveBtn
+												card={cardStack[currentCardIndex]}
+												setName={setTitle}
+												setCreator={username}
+												user={user}
+											/>
+										) : (
+											""
+										)}
+										<Share />
+									</HStack>
+								</SimpleGrid>
+								<Box w="100%" float={"left"}>
+									<Box
+										w={"100%"}
+										position="relative"
+										h="auto"
+										mx={2}
+										mt={2}
+										overflow={"visible"}
+									>
+										<Skeleton isLoaded={!isLoading}>
+											<Slider
+												dots={false}
+												infinite={true}
+												accessibility
+												speed="300"
+												slidesToShow={1}
+												slidesToScroll={1}
+												arrows={false}
+												maxH={"sm"}
+												ref={slider}
+												afterChange={(current) => setCurrentCardIndex(current)}
+											>
+												{cardStack.map((card, index) => (
+													<Box>
+														<Box onClick={cardClick}>
+															<Card
+																front={card.front}
+																back={card.back}
+																link={card.link}
+																block_type={card.block_type}
+																block_content={card.block_content}
+																key={index}
+																fontSize={fontSize}
+																flipped={isFlipped}
+																full={true}
+															/>
+														</Box>
 													</Box>
-												</Box>
-											))}
-										</Slider>
-									</Skeleton>
-									<Box my={2} w="full">
-										<HStack
-											w="full"
-											display={"flex"}
-											justifyContent="center"
-											alignItems={"center"}
-										>
-											<IconButton
-												icon={<ArrowBackIcon />}
-												onClick={handleSliderPrev}
-												display="inline"
-											/>
-											<Text flexGrow={1} textAlign="center" fontSize={"1.25em"}>
-												{" "}
-												{currentCardIndex + 1} / {cardStack.length}{" "}
-											</Text>
-											<IconButton
-												icon={<ArrowForwardIcon />}
-												onClick={handleSliderNext}
-												display="inline"
-											/>
-										</HStack>
+												))}
+											</Slider>
+										</Skeleton>
+										<Box my={2} w="full">
+											<HStack
+												w="full"
+												display={"flex"}
+												justifyContent="center"
+												alignItems={"center"}
+											>
+												<IconButton
+													icon={<ArrowBackIcon />}
+													onClick={handleSliderPrev}
+													display="inline"
+												/>
+												<Text
+													flexGrow={1}
+													textAlign="center"
+													fontSize={"1.25em"}
+												>
+													{" "}
+													{currentCardIndex + 1} / {cardStack.length}{" "}
+												</Text>
+												<IconButton
+													icon={<ArrowForwardIcon />}
+													onClick={handleSliderNext}
+													display="inline"
+												/>
+											</HStack>
+										</Box>
 									</Box>
 								</Box>
+							</>
+						) : (
+							<>
+								<Box minH={10} />
+								<Box
+									h={["3xs", "3xs", "2xs", "2xs", "2xs", "sm"]}
+									minH={"2xs"}
+									maxH="sm"
+									display={"flex"}
+									alignItems="center"
+									justifyContent={"center"}
+								>
+									<Heading>No Cards</Heading>
+								</Box>
+							</>
+						)
+					) : (
+						<>
+							<Box minH={10} />
+							<Box
+								h={["3xs", "3xs", "2xs", "2xs", "2xs", "sm"]}
+								minH={"2xs"}
+								maxH="sm"
+								display={"flex"}
+								alignItems="center"
+								justifyContent={"center"}
+							>
+								<Spinner size={'lg'}/>
 							</Box>
 						</>
-					) : (
-						<Box
-							h={["3xs", "3xs", "2xs", "2xs", "2xs", "sm"]}
-							minH={"2xs"}
-							maxH="sm"
-							display={"flex"}
-							alignItems="center"
-							justifyContent={"center"}
-						>
-							<Heading>No Cards</Heading>
-						</Box>
 					)}
 
 					<Box w={"full"} pb={"2.5em"} mx="2">
@@ -355,7 +407,7 @@ export const CardsetFull = () => {
 										href={`/cardset/${username}/${setTitle}`}
 										as="a"
 									>
-										View this Card Set
+										View All Cards
 									</Button>
 									<Button
 										colorScheme="blue"
