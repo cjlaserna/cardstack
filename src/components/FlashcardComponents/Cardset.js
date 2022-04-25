@@ -29,6 +29,7 @@ import {
   ScaleFade,
   Fade,
   HStack,
+  VStack,
 } from "@chakra-ui/react";
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
@@ -40,11 +41,19 @@ import {
   ArrowBackIcon,
   LinkIcon,
   DeleteIcon,
+  EditIcon,
 } from "@chakra-ui/icons";
 import "katex/dist/katex.min.css";
 import TeX from "@matejmazur/react-katex";
 import { colors } from "../../values/colors";
 import { Share } from "./Share";
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { atelierSulphurpoolDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { languages, SupportedLang } from "./Card Component/SupportedLang";
+import { Select } from "chakra-react-select";
+import { CardLong } from "./Card Component/CardLong";
+import { handleDel, SaveBtn } from "./Card Component/SaveBtn";
+import { EditBtn } from "./Card Component/EditBtn";
 
 export const Cardset = () => {
   // states & vars
@@ -53,6 +62,7 @@ export const Cardset = () => {
   const [cardStack, setCardStack] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [userID, setUserID] = useState(null);
+  const [selected, setSelIndex] = useState('plaintext');
 
   // toast
   const toast = useToast();
@@ -65,13 +75,13 @@ export const Cardset = () => {
   const [currBlock, setCurrBlock] = useState({
     blockType: "none",
     blockVal: "",
+    blockLang: "plaintext"
   });
 
   // refs
   const inputRef = useRef();
   const frontRef = useRef();
   const backRef = useRef();
-
   // modals
   const {
     isOpen: isMathOpen,
@@ -176,7 +186,6 @@ export const Cardset = () => {
       blockType: "math",
       blockVal: inputRef.current.value.toString(),
     });
-    console.log(currBlock.blockType);
     setTarget("");
     onMathClose();
   };
@@ -185,10 +194,9 @@ export const Cardset = () => {
     setCurrBlock({
       blockType: "code",
       blockVal: inputRef.current.value.toString(),
+      blockLang: selected
     });
-    console.log(currBlock.blockType);
     setTarget("");
-    console.log(inputRef.current.value.toString());
     onCodeClose();
   };
   const onSubmitImg = () => {
@@ -196,7 +204,6 @@ export const Cardset = () => {
       blockType: "image",
       blockVal: inputRef.current.value.toString(),
     });
-    console.log(currBlock.blockType);
     setTarget("");
     onImgClose();
   };
@@ -225,16 +232,16 @@ export const Cardset = () => {
         );
       case "code":
         return (
-          <Code
-            colorScheme="green"
-            children={currBlock.blockVal}
-            variant="solid"
-            p="20px"
-            w={"full"}
-            borderRadius="5px"
-            mt={"10px"}
-            whiteSpace="pre-wrap"
-          />
+          <SyntaxHighlighter
+            language={selected ? selected : 'plaintext'}
+            wrapLongLines
+            useInlineStyles
+            customStyle={{
+              padding: "var(--chakra-space-5)",
+              borderRadius: "var(--chakra-space-5)"
+            }}
+            style={atelierSulphurpoolDark}
+          >{currBlock.blockVal}</SyntaxHighlighter>
         );
       case "image":
         return (
@@ -251,14 +258,13 @@ export const Cardset = () => {
 
   // add cards
   async function addCard() {
-    console.log(cardData.cards.cards);
     let temp = cardData.cards.cards;
-
     temp.push({
       front: frontRef.current.value,
       back: backRef.current.value,
       block_type: currBlock.blockType,
       block_content: currBlock.blockVal,
+      block_language: currBlock.blockLang,
       link: link,
     });
 
@@ -293,10 +299,10 @@ export const Cardset = () => {
 
   // delete cards given cards index array
   async function delCard(card) {
+    let temp = cardData.cards.cards;
+    let index = temp[card];
+    handleDel(temp[card], user, username, setTitle);
     try {
-      let temp = cardData.cards.cards;
-      let index = temp[card];
-      console.log(index);
       let newtemp = temp;
       if (card !== -1) {
         newtemp.splice(card, 1);
@@ -332,6 +338,14 @@ export const Cardset = () => {
       });
     }
   }
+
+  // options
+  const options = [...languages].map(function (language) {
+    return {
+      label: language.name,
+      value: language.name,
+    }
+  });
 
   // prevent refresh while deleting
   window.onbeforeunload = (event) => {
@@ -452,18 +466,103 @@ export const Cardset = () => {
               </Heading>
             </Box>
 
-            <HStack float={"right"}>
-              <Button
-                colorScheme={"blue"}
-                href={`/cardset/${username}/${setTitle}/full`}
-                as="a"
-              >
-                Study this set
-              </Button>
-              <Share/>
-            </HStack>
+            <Box w={'full'} display='block' display='inline-block'>
+              <HStack float={"right"}>
+                <Button
+                  colorScheme={"blue"}
+                  href={`/cardset/${username}/${setTitle}/full`}
+                  as="a"
+                >
+                  Study this set
+                </Button>
+                <Share />
+              </HStack>
+            </Box>
+            {/* testing start*/}
+            <VStack spacing={3}>
+              {
+                cardData.cards.cards.map((card, index) => (
+                  <>
+                    <Box w='full'>
+                      <CardLong
+                        front={card.front}
+                        back={card.back}
+                        link={card.link}
+                        block_type={card.block_type}
+                        block_content={card.block_content}
+                        block_language={card.block_language}
+                        key={index}
+                      />
+                      {onDel ? (
+                        <Box mx={1}>
+                          <Fade in={onDel}>
+                            <Box
+                              float={"right"}
+                              display="flex"
+                              justifyContent={"center"}
+                            >
+                              <Text display="inline" mx={"2"}>
+                                Delete Card?{" "}
+                              </Text>
+                              <Checkbox
+                                colorScheme="red"
+                                size={"lg"}
+                                _hover={{ color: "red", cursor: "pointer" }}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    let temp = delItems;
+                                    temp.push(index);
+                                    setDelItems(temp);
+                                    console.log(delItems);
+                                    console.log(index);
+                                  } else if (!e.target.checked) {
+                                    if (delItems.length === 1) {
+                                      setDelItems([]);
+                                    } else {
+                                      let temp = delItems;
+                                      temp.splice(index, 1);
+                                      setDelItems(temp);
+                                      console.log(temp);
+                                    }
+                                  } else {
+                                    toast({
+                                      title: "Site Error",
+                                      description:
+                                        "Refresh your page to fix this issue",
+                                      status: "error",
+                                      duration: 4000,
+                                      isClosable: true,
+                                    });
+                                  }
+                                }}
+                              />
+                            </Box>
+                          </Fade>
+                        </Box>
+                      ) : (
+                        user ? (
+                          <Box
+                            float={"right"}
+                            display="flex"
+                            justifyContent={"center"}
+                            my={1}
+                          >
+                            <HStack spacing={2}>
+                              <EditBtn card={card} />
+                              <SaveBtn card={card} setName={setTitle} setCreator={username} user={user} size={'sm'} />
+                            </HStack>
+                          </Box>
+                        ) : ''
+                      )}
+                    </Box>
+                  </>
+                ))
+              }
+            </VStack>
+
             {/* Main Cards (Default Grid View) */}
             <Box my={5} py={10}>
+              <Heading my={2}>Grid View</Heading>
               <SimpleGrid columns={[1, 1, 2, 2, 3, 3]} spacing={5}>
                 {cardData.cards.cards.map((card, index) => (
                   <Box>
@@ -473,58 +572,9 @@ export const Cardset = () => {
                       link={card.link}
                       block_type={card.block_type}
                       block_content={card.block_content}
+                      block_language={card.block_language}
                       key={index}
                     />
-
-                    {onDel ? (
-                      <Box my="2" mx={1}>
-                        <Fade in={onDel}>
-                          <Box
-                            float={"right"}
-                            display="flex"
-                            justifyContent={"center"}
-                          >
-                            <Text display="inline" mx={"2"}>
-                              Delete Card?{" "}
-                            </Text>
-                            <Checkbox
-                              colorScheme="red"
-                              size={"lg"}
-                              _hover={{ color: "red", cursor: "pointer" }}
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  let temp = delItems;
-                                  temp.push(index);
-                                  setDelItems(temp);
-                                  console.log(delItems);
-                                  console.log(index);
-                                } else if (!e.target.checked) {
-                                  if (delItems.length === 1) {
-                                    setDelItems([]);
-                                  } else {
-                                    let temp = delItems;
-                                    temp.splice(index, 1);
-                                    setDelItems(temp);
-                                    console.log(temp);
-                                  }
-                                } else {
-                                  toast({
-                                    title: "Site Error",
-                                    description:
-                                      "Refresh your page to fix this issue",
-                                    status: "error",
-                                    duration: 4000,
-                                    isClosable: true,
-                                  });
-                                }
-                              }}
-                            />
-                          </Box>
-                        </Fade>
-                      </Box>
-                    ) : (
-                      ""
-                    )}
                   </Box>
                 ))}
               </SimpleGrid>
@@ -647,159 +697,170 @@ export const Cardset = () => {
                 <Button colorScheme="blue" float="right" onClick={addCard}>
                   Submit
                 </Button>
-
-                {/* Modals */}
-                <Modal
-                  onClose={onMathClose}
-                  isOpen={isMathOpen}
-                  isCentered
-                  size={"md"}
-                >
-                  <ModalOverlay />
-                  <ModalContent p="10px">
-                    <ModalCloseButton />
-                    <ModalHeader pb={"5px"}>Math Editor</ModalHeader>
-                    <ModalBody>
-                      <form>
-                        <Input
-                          ref={inputRef}
-                          size={"md"}
-                          mb="10px"
-                          autoComplete="off"
-                          onChange={onChange}
-                          placeholder="Enter a math problem."
-                          isRequired
-                        />
-                        <Text>Preview</Text>
-                        <Box h="5em" overflow={"auto"}>
-                          {target ? <TeX math={target} block /> : ""}
-                          <Link
-                            display={"block"}
-                            href="https://katex.org/docs/support_table.html"
-                            target={"_blank"}
-                            color={"purple.500"}
-                          >
-                            Need Katex Help?
-                          </Link>
-                        </Box>
-                        <Button float="right" onClick={onSubmitMath}>
-                          Submit
-                        </Button>
-                      </form>
-                    </ModalBody>
-                  </ModalContent>
-                </Modal>
-
-                <Modal
-                  onClose={onCodeClose}
-                  isOpen={isCodeOpen}
-                  isCentered
-                  size={"md"}
-                >
-                  <ModalOverlay />
-                  <ModalContent p="10px">
-                    <ModalCloseButton />
-                    <ModalHeader pb={"5px"}>Code Editor</ModalHeader>
-                    <ModalBody>
-                      <form>
-                        <Textarea
-                          ref={inputRef}
-                          size={"md"}
-                          mb="10px"
-                          autoComplete="off"
-                          onChange={onChange}
-                          placeholder="Enter your code here"
-                          isRequired
-                        />
-                        <Text>Preview</Text>
-                        <Box h="5em" overflow={"auto"}>
-                          {target ? (
-                            <Code
-                              colorScheme="green"
-                              children={target}
-                              variant="solid"
-                              p="20px"
-                              w={"full"}
-                              borderRadius="5px"
-                              whiteSpace={"pre-wrap"}
-                            />
-                          ) : (
-                            ""
-                          )}
-                        </Box>
-                        <Button float="right" onClick={onSubmitCode}>
-                          Submit
-                        </Button>
-                      </form>
-                    </ModalBody>
-                  </ModalContent>
-                </Modal>
-
-                <Modal
-                  onClose={onImgClose}
-                  isOpen={isImgOpen}
-                  isCentered
-                  size={"lg"}
-                >
-                  <ModalOverlay />
-                  <ModalContent p="10px">
-                    <ModalCloseButton />
-                    <ModalHeader pb={"5px"}>Add Image</ModalHeader>
-                    <ModalBody>
-                      <form>
-                        <Input
-                          ref={inputRef}
-                          size={"md"}
-                          mb="10px"
-                          autoComplete="off"
-                          onChange={onChange}
-                          placeholder="Enter an Image URL"
-                          isRequired
-                        />
-                        <Text>Preview</Text>
-                        <Box h="5em" overflow={"auto"}>
-                          {target ? <Image src={target} w="50%" /> : ""}
-                        </Box>
-                        <Button float="right" onClick={onSubmitImg}>
-                          Submit
-                        </Button>
-                      </form>
-                    </ModalBody>
-                  </ModalContent>
-                </Modal>
-
-                <Modal
-                  onClose={onLinkClose}
-                  isOpen={isLinkOpen}
-                  isCentered
-                  size={"xs"}
-                >
-                  <ModalOverlay />
-                  <ModalContent p="10px">
-                    <ModalCloseButton />
-                    <ModalHeader pb={"5px"}>Add Link</ModalHeader>
-                    <ModalBody>
-                      <form>
-                        <Input
-                          ref={inputRef}
-                          size={"md"}
-                          mb="10px"
-                          autoComplete="off"
-                          placeholder="Enter your own link"
-                          isRequired
-                        />
-                        <Button float="right" onClick={onSubmitLink}>
-                          Submit
-                        </Button>
-                      </form>
-                    </ModalBody>
-                  </ModalContent>
-                </Modal>
               </Container>
             </ModalBody>
           </ModalContent>
         </Modal>
       </>
+
+      {/* Modals */}
+      <Modal
+        onClose={onMathClose}
+        isOpen={isMathOpen}
+        isCentered
+        size={"md"}
+      >
+        <ModalOverlay />
+        <ModalContent p="10px">
+          <ModalCloseButton />
+          <ModalHeader pb={"5px"}>Math Editor</ModalHeader>
+          <ModalBody>
+            <form>
+              <Input
+                ref={inputRef}
+                size={"md"}
+                mb="10px"
+                autoComplete="off"
+                onChange={onChange}
+                placeholder="Enter a math problem."
+                isRequired
+              />
+              <Text>Preview</Text>
+              <Box h="5em" overflow={"auto"}>
+                {target ? <TeX math={target} block /> : ""}
+                <Link
+                  display={"block"}
+                  href="https://katex.org/docs/support_table.html"
+                  target={"_blank"}
+                  color={"purple.500"}
+                >
+                  Need Katex Help?
+                </Link>
+              </Box>
+              <Button float="right" onClick={onSubmitMath}>
+                Submit
+              </Button>
+            </form>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        onClose={onCodeClose}
+        isOpen={isCodeOpen}
+        isCentered
+        size={"md"}
+      >
+        <ModalOverlay />
+        <ModalContent p="10px">
+          <ModalCloseButton />
+          <ModalHeader pb={"5px"}>Code Editor</ModalHeader>
+          <ModalBody>
+            <form>
+              <Textarea
+                ref={inputRef}
+                size={"md"}
+                mb="10px"
+                autoComplete="off"
+                onChange={onChange}
+                placeholder="Enter your code here"
+                isRequired
+              />
+              <Select
+                placeholder="Select a language"
+                id='langSelect'
+                options={options}
+                value={options.find(obj => obj.value === selected)}
+                onChange={(e) => {
+                  setSelIndex(e.label);
+                }}
+              >
+              </Select>
+              <Text>Preview</Text>
+              <Box h="5em" overflow={"auto"}>
+                {target ? (
+                  <SyntaxHighlighter
+                    language={selected ? selected : 'plaintext'}
+                    wrapLongLines
+                    useInlineStyles
+                    customStyle={{
+                      padding: "var(--chakra-space-5)",
+                      borderRadius: "var(--chakra-space-5)"
+                    }}
+                    style={atelierSulphurpoolDark}
+                  >{target}</SyntaxHighlighter>
+                ) : (
+                  ""
+                )}
+              </Box>
+              <Button float="right" onClick={onSubmitCode}>
+                Submit
+              </Button>
+            </form>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        onClose={onImgClose}
+        isOpen={isImgOpen}
+        isCentered
+        size={"lg"}
+      >
+        <ModalOverlay />
+        <ModalContent p="10px">
+          <ModalCloseButton />
+          <ModalHeader pb={"5px"}>Add Image</ModalHeader>
+          <ModalBody>
+            <form>
+              <Input
+                ref={inputRef}
+                size={"md"}
+                mb="10px"
+                autoComplete="off"
+                onChange={onChange}
+                placeholder="Enter an Image URL"
+                isRequired
+              />
+              <Text>Preview</Text>
+              <Box h="5em" overflow={"auto"}>
+                {target ? <Image src={target} w="50%" /> : ""}
+              </Box>
+              <Button float="right" onClick={onSubmitImg}>
+                Submit
+              </Button>
+            </form>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        onClose={onLinkClose}
+        isOpen={isLinkOpen}
+        isCentered
+        size={"xs"}
+      >
+        <ModalOverlay />
+        <ModalContent p="10px">
+          <ModalCloseButton />
+          <ModalHeader pb={"5px"}>Add Link</ModalHeader>
+          <ModalBody>
+            <form>
+              <Input
+                ref={inputRef}
+                size={"md"}
+                mb="10px"
+                autoComplete="off"
+                placeholder="Enter your own link"
+                isRequired
+              />
+              <Button float="right" onClick={onSubmitLink}>
+                Submit
+              </Button>
+            </form>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
 
       <Modal
         isOpen={isDelOpen}
@@ -812,8 +873,8 @@ export const Cardset = () => {
             <Text>
               {delItems.length !== 0
                 ? "Are you sure you want to delete all " +
-                  delItems.length +
-                  " items?"
+                delItems.length +
+                " items?"
                 : "No Items Selected"}
             </Text>
           </ModalBody>

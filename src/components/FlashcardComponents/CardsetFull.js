@@ -323,6 +323,7 @@ export const CardsetFull = () => {
 																link={card.link}
 																block_type={card.block_type}
 																block_content={card.block_content}
+																block_language={card.block_language}
 																key={index}
 																fontSize={fontSize}
 																flipped={isFlipped}
