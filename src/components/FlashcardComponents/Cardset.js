@@ -298,35 +298,46 @@ export const Cardset = () => {
   }
 
   // delete cards given cards index array
-  async function delCard(card) {
-    let temp = cardData.cards.cards;
-    let index = temp[card];
-    handleDel(temp[card], user, username, setTitle);
+  async function delCard(cards) {
+    console.log(cards)
+    const user = supabase.auth.user();
+    let originalCards = cardData.cards.cards;
+    let newCards = originalCards;
+    let newObj;
+
+    await cards.every((card) => {
+      // deleting cards from the "starred list"
+      let index = originalCards[card];
+      handleDel(index, user, username, setTitle);
+
+      newCards = newCards.filter(function (value, card) {
+        return cards.indexOf(card) == -1;
+      })
+    })
+
+    // new obj parsed and everything
+    const newStr = `{"cards":${JSON.stringify(newCards)}}`;
+    console.log(newStr);
+    newObj = JSON.parse(`${newStr}`);
+
+    // original object
+    const match = `{"cards":${JSON.stringify(originalCards)}}`;
+    const matchObj = JSON.parse(`${match}`);
+
     try {
-      let newtemp = temp;
-      if (card !== -1) {
-        newtemp.splice(card, 1);
-      }
-      console.log(newtemp);
-
-      const newStr = `{"cards":${JSON.stringify(newtemp)}}`;
-      console.log(newStr);
-      const newobj = JSON.parse(`${newStr}`);
-
-      const match = `{"cards":${JSON.stringify(temp)}}`;
-      const matchObj = JSON.parse(`${match}`);
-      console.log(matchObj);
-      const user = supabase.auth.user();
-
       let { error } = await supabase
         .from("cardsets")
-        .update({ cards: newobj })
+        .update({ cards: newObj })
         .eq("user_id", user.id)
         .eq("cardset_name", setTitle)
         .single();
 
       if (error) {
         throw error;
+      } else {
+        var newCardData = cardData
+        newCardData.cards = newObj;
+        setCardData(newCardData);
       }
     } catch (error) {
       toast({
@@ -479,106 +490,93 @@ export const Cardset = () => {
               </HStack>
             </Box>
             {/* testing start*/}
-            <VStack spacing={3}>
-              {
-                cardData.cards.cards.map((card, index) => (
-                  <>
-                    <Box w='full'>
-                      <CardLong
-                        front={card.front}
-                        back={card.back}
-                        link={card.link}
-                        block_type={card.block_type}
-                        block_content={card.block_content}
-                        block_language={card.block_language}
-                        key={index}
-                      />
-                      {onDel ? (
-                        <Box mx={1}>
-                          <Fade in={onDel}>
-                            <Box
-                              float={"right"}
-                              display="flex"
-                              justifyContent={"center"}
-                            >
-                              <Text display="inline" mx={"2"}>
-                                Delete Card?{" "}
-                              </Text>
-                              <Checkbox
-                                colorScheme="red"
-                                size={"lg"}
-                                _hover={{ color: "red", cursor: "pointer" }}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    let temp = delItems;
-                                    temp.push(index);
-                                    setDelItems(temp);
-                                    console.log(delItems);
-                                    console.log(index);
-                                  } else if (!e.target.checked) {
-                                    if (delItems.length === 1) {
-                                      setDelItems([]);
-                                    } else {
-                                      let temp = delItems;
-                                      temp.splice(index, 1);
-                                      setDelItems(temp);
-                                      console.log(temp);
-                                    }
-                                  } else {
-                                    toast({
-                                      title: "Site Error",
-                                      description:
-                                        "Refresh your page to fix this issue",
-                                      status: "error",
-                                      duration: 4000,
-                                      isClosable: true,
-                                    });
-                                  }
-                                }}
-                              />
+            {
+              (cardStack && cardStack.length !== 0) ? (
+                <VStack spacing={3} pb={5}>
+                  {
+                    cardData.cards.cards.map((card, index) => (
+                      <>
+                        <Box w='full'>
+                          <CardLong
+                            front={card.front}
+                            back={card.back}
+                            link={card.link}
+                            block_type={card.block_type}
+                            block_content={card.block_content}
+                            block_language={card.block_language}
+                            key={index}
+                          />
+                          {onDel ? (
+                            <Box mx={1}>
+                              <Fade in={onDel}>
+                                <Box
+                                  float={"right"}
+                                  display="flex"
+                                  justifyContent={"center"}
+                                >
+                                  <Text display="inline" mx={"2"}>
+                                    Delete Card?{" "}
+                                  </Text>
+                                  <Checkbox
+                                    colorScheme="red"
+                                    size={"lg"}
+                                    _hover={{ color: "red", cursor: "pointer" }}
+                                    onChange={(e) => {
+                                      if (e.target.checked) {
+                                        let temp = delItems;
+                                        temp.push(index);
+                                        setDelItems(temp);
+                                        console.log(delItems);
+                                        console.log(index);
+                                      } else if (!e.target.checked) {
+                                        if (delItems.length === 1) {
+                                          setDelItems([]);
+                                        } else {
+                                          let temp = delItems;
+                                          temp.splice(index, 1);
+                                          setDelItems(temp);
+                                          console.log(temp);
+                                        }
+                                      } else {
+                                        toast({
+                                          title: "Site Error",
+                                          description:
+                                            "Refresh your page to fix this issue",
+                                          status: "error",
+                                          duration: 4000,
+                                          isClosable: true,
+                                        });
+                                      }
+                                    }}
+                                  />
+                                </Box>
+                              </Fade>
                             </Box>
-                          </Fade>
+                          ) : (
+                            user ? (
+                              userID === user.id ? (
+                                <Box
+                                  float={"right"}
+                                  display="flex"
+                                  justifyContent={"center"}
+                                  my={1}
+                                >
+                                  <HStack spacing={2}>
+                                    <EditBtn card={card} cards={cardData.cards.cards} title={setTitle} />
+                                    <SaveBtn card={card} setName={setTitle} setCreator={username} user={user} size={'sm'} />
+                                  </HStack>
+                                </Box>
+                              ) : ''
+                            ) : ''
+                          )}
                         </Box>
-                      ) : (
-                        user ? (
-                          <Box
-                            float={"right"}
-                            display="flex"
-                            justifyContent={"center"}
-                            my={1}
-                          >
-                            <HStack spacing={2}>
-                              <EditBtn card={card} />
-                              <SaveBtn card={card} setName={setTitle} setCreator={username} user={user} size={'sm'} />
-                            </HStack>
-                          </Box>
-                        ) : ''
-                      )}
-                    </Box>
-                  </>
-                ))
-              }
-            </VStack>
-
-            {/* Main Cards (Default Grid View) */}
-            <Box my={5} py={10}>
-              <Heading my={2}>Grid View</Heading>
-              <SimpleGrid columns={[1, 1, 2, 2, 3, 3]} spacing={5}>
-                {cardData.cards.cards.map((card, index) => (
-                  <Box>
-                    <Card
-                      front={card.front}
-                      back={card.back}
-                      link={card.link}
-                      block_type={card.block_type}
-                      block_content={card.block_content}
-                      block_language={card.block_language}
-                      key={index}
-                    />
-                  </Box>
-                ))}
-              </SimpleGrid>
-            </Box>
+                      </>
+                    ))
+                  }
+                </VStack>
+              ) :
+                <Text fontSize={'1.25em'}>There are no cards in this set.</Text>
+            }
           </>
         ) : (
           ""
@@ -883,8 +881,9 @@ export const Cardset = () => {
               Cancel
             </Button>
             <Button
-              onClick={() => {
-                delItems.every(delCard);
+              onClick={async () => {
+                await delCard(delItems);
+                console.log(delItems);
                 onDelClose();
                 setOnDel(false);
                 setDelItems([]);

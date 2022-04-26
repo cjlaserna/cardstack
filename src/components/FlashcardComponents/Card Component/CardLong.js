@@ -6,7 +6,8 @@ import {
     Center,
     Image,
     AspectRatio,
-    SimpleGrid
+    SimpleGrid,
+    Divider
 } from "@chakra-ui/react";
 import React, { useState, useEffect } from "react";
 import TeX from "@matejmazur/react-katex";
@@ -96,21 +97,7 @@ export const CardLong = ({
                                 {front}
                             </Text>
                         </Box>
-                        <Box position={'absolute'} bottom='0'>
-                            <Text
-                                isTruncated
-                                textOverflow="ellipsis"
-                                overflow={"hidden"}
-                                whiteSpace="nowrap"
-                            >
-                                Source/Link:{" "}
-                                <Untabbable>
-                                    <Link display={"inline-block"} href={link} isExternal>
-                                        {link}
-                                    </Link>
-                                </Untabbable>
-                            </Text>
-                        </Box>
+                        <Divider orientation='vertical' position={'absolute'} right='0' top='0'/>
                     </Box>
                     <Box
                         flexGrow="1"

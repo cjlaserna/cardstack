@@ -31,10 +31,18 @@ import SyntaxHighlighter from 'react-syntax-highlighter';
 import { atelierSulphurpoolDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { languages, SupportedLang } from "./SupportedLang";
 import { Select } from "chakra-react-select";
+import { supabase } from '../../../backend/supabaseClient';
 
-export const EditBtn = ({ card }) => {
+export const EditBtn = ({ card, cards, title }) => {
+
+    const user = supabase.auth.user(); 
+
     // states & vars
     const originalCard = card;
+    var originalStack = [];
+    cards.map((card) => {
+        originalStack.push(card);
+    });
 
     // to use later
     const link = card.link;
@@ -182,6 +190,44 @@ export const EditBtn = ({ card }) => {
                 return <></>;
         }
     }
+    // change card
+    async function editSubmit() {
+        const x = originalStack.findIndex((element) => element === originalCard);
+        var temp = originalStack;
+        temp[x].back = backRef.current.value;
+        temp[x].front = frontRef.current.value;
+        temp[x].block_content = currBlock.blockVal;
+        temp[x].block_type = currBlock.blockType;
+        temp[x].block_language = currBlock.blockLang;
+        temp = JSON.stringify(temp);
+        console.log(temp);
+
+        const newCards = `{"cards":${temp}}`;
+        const newCardsObj = JSON.parse(newCards);
+
+        try {
+            let { error } = await supabase
+                .from("cardsets")
+                .update({ cards: newCardsObj })
+                .eq("user_id", user.id)
+                .eq("cardset_name", title)
+                .single();
+
+            if (error) {
+                throw error;
+            }
+        } catch (error) {
+            toast({
+                title: "Error " + error.status,
+                description: error.message,
+                status: "error",
+                duration: 4000,
+                isClosable: true,
+            });
+        }
+        onAddClose();
+        window.location.reload(false);
+    }
     return (
         <>
             <IconButton icon={<EditIcon />} size='sm' onClick={onAddOpen} />
@@ -292,7 +338,7 @@ export const EditBtn = ({ card }) => {
                                     </Tooltip>
                                 </SimpleGrid>
                             </ButtonGroup>
-                            <Button colorScheme="blue" float="right">
+                            <Button colorScheme="blue" float="right" onClick={editSubmit}>
                                 Submit
                             </Button>
                         </Container>
@@ -318,7 +364,7 @@ export const EditBtn = ({ card }) => {
                                 size={"md"}
                                 mb="10px"
                                 autoComplete="off"
-                                defaultValue={(currBlock.blockType === 'math') ? currBlock.blockVal: ''}
+                                defaultValue={(currBlock.blockType === 'math') ? currBlock.blockVal : ''}
                                 onChange={onChange}
                                 placeholder="Enter a math problem."
                                 isRequired
@@ -363,7 +409,7 @@ export const EditBtn = ({ card }) => {
                                 onChange={onChange}
                                 placeholder="Enter your code here"
                                 isRequired
-                                defaultValue={(currBlock.blockType === 'code') ? currBlock.blockVal: ''}
+                                defaultValue={(currBlock.blockType === 'code') ? currBlock.blockVal : ''}
                             />
                             <Select
                                 placeholder="Select a language"
@@ -418,7 +464,7 @@ export const EditBtn = ({ card }) => {
                                 mb="10px"
                                 autoComplete="off"
                                 onChange={onChange}
-                                defaultValue={(currBlock.blockType === 'image') ? currBlock.blockVal: ''}
+                                defaultValue={(currBlock.blockType === 'image') ? currBlock.blockVal : ''}
                                 placeholder="Enter an Image URL"
                                 isRequired
                             />
@@ -464,12 +510,3 @@ export const EditBtn = ({ card }) => {
         </>
     )
 }
-
-EditBtn.defaultProps = {
-    link: "/",
-    back: "",
-    front: "",
-    block_type: "none",
-    block_content: "",
-    block_language: "plaintext"
-};
