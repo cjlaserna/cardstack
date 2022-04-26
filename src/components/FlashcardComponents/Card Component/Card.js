@@ -11,7 +11,9 @@ import React, { useState, useEffect } from "react";
 import ReactCardFlip from "react-card-flip";
 import TeX from "@matejmazur/react-katex";
 import { Untabbable } from "react-untabbable";
-import { SpeechBtn } from "./SpeechBtn";
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { atelierSulphurpoolDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { SupportedLang } from "./SupportedLang";
 
 export const Card = ({
   front,
@@ -19,6 +21,7 @@ export const Card = ({
   link,
   block_type,
   block_content,
+  block_language,
   fontSize,
   flipped,
   full,
@@ -29,6 +32,11 @@ export const Card = ({
     setIsFlipped(!isFlipped);
   };
 
+  const containerStyle = {
+    padding: "var(--chakra-space-5)",
+    borderRadius: "var(--chakra-space-5)"
+  }
+  
   function blockRender() {
     switch (block_type) {
       case "math":
@@ -39,16 +47,13 @@ export const Card = ({
         );
       case "code":
         return (
-          <Code
-            colorScheme="green"
-            children={block_content}
-            variant="solid"
-            p="20px"
-            w={"full"}
-            borderRadius="5px"
-            mt={"10px"}
-            whiteSpace="pre-wrap"
-          />
+          <SyntaxHighlighter 
+          language={block_language} 
+          wrapLongLines
+          useInlineStyles
+          customStyle={containerStyle}
+          style={atelierSulphurpoolDark}
+          >{block_content}</SyntaxHighlighter>
         );
       case "image":
         return (
@@ -174,6 +179,7 @@ Card.defaultProps = {
   front: "No Front Question Found",
   back: "",
   link: "",
+  block_language: "plaintext",
   block_type: "none",
   block_content: null,
   fontSize: "1.25em",
