@@ -68,9 +68,6 @@ export const Home = () => {
               </Button>
             </ButtonGroup>
           </Box>
-          <Box overflow={"clip"}>
-            <Spline scene="https://prod.spline.design/ga3gtDxsya9ng8w3/scene.spline" />
-          </Box>
         </Box>
         <Box backgroundSize={"cover"} pb={[1, 1, 10, 10, 10, 10, 10]} my="10">
           <Box textAlign={"center"} py={10} my={[0, 0, 10]}>
