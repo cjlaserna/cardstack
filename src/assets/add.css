@@ -1,1 +1,3 @@
-.prev:h
+.katex-display {
+	overflow: hidden;
+}

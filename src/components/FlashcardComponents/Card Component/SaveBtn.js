@@ -78,17 +78,16 @@ export const SaveBtn = ({ card, setName, setCreator, user, size, onDel }) => {
 	const ink = useColorModeValue("gray", "lightgray");
 
 	async function starCard() {
-		setStarred(await fetchStarred(user, setName, setCreator));
+		getStarred();
 		// if there are cards starred, fetch cards, add to it, send back new cards
 		if (starred !== null) {
 			// check if the card is already starred
-			const isCardInSet = checkIfStarred();
+			const isCardInSet = await checkIfStarred();
 
 			if (isCardInSet) {
 				// if card is starred, unstar card
 				var arr = [];
 				var stringArr = [];
-				console.log(starred)
 				starred.map((card) => {
 					arr.push(card);
 					stringArr.push(JSON.stringify(card));
@@ -111,7 +110,7 @@ export const SaveBtn = ({ card, setName, setCreator, user, size, onDel }) => {
 					if (error) {
 						throw error;
 					} else {
-						setStarred(cardsObj.cards);
+						getStarred();
 					}
 				} catch (error) {
 					toast({
@@ -125,7 +124,6 @@ export const SaveBtn = ({ card, setName, setCreator, user, size, onDel }) => {
 			} else {
 				// if card is not starred, star card
 				var arr = [];
-				console.log(starred)
 				starred.map((card) => {
 					arr.push(card);
 					return arr;
@@ -149,7 +147,13 @@ export const SaveBtn = ({ card, setName, setCreator, user, size, onDel }) => {
 					if (error) {
 						throw error;
 					} else {
-						setStarred(cardsObj.cards);
+						toast({
+							title: "Successfully Added",
+							status: "success",
+							duration: 4000,
+							isClosable: true,
+						});
+						getStarred();
 					}
 				} catch (error) {
 					toast({
@@ -179,12 +183,13 @@ export const SaveBtn = ({ card, setName, setCreator, user, size, onDel }) => {
 			else {
 				console.log(error);
 			}
-			setStarred(cardsObj.cards);
+			getStarred();
 		}
 	}
 
 	// check if card is in starred
-	const checkIfStarred = () => {
+	async function checkIfStarred() {
+		getStarred();
 		var arr = [];
 		starred.map((card) => {
 			arr.push(JSON.stringify(card));
@@ -192,12 +197,36 @@ export const SaveBtn = ({ card, setName, setCreator, user, size, onDel }) => {
 		return arr.includes(JSON.stringify(card));
 	};
 
+	const includesStarred = () => {
+		var arr = [];
+		starred.map((card) => {
+			arr.push(JSON.stringify(card));
+		});
+		return arr.includes(JSON.stringify(card));
+	}
+
+	async function getStarred() {
+		console.log('balls')
+		let { data: starred, error } = await supabase
+			.from("starred")
+			.select("*")
+			.eq("user_id", user.id)
+			.eq("cardset_name", setName)
+			.eq("cardset_creator", setCreator)
+			.single();
+
+		if (error) {
+			return null;
+		} else {
+			setStarred(starred.cards.cards);
+			console.log(starred.cards.cards)
+		}
+		setIsLoading(false);
+	}
+
 	useEffect(() => {
 		setIsLoading(true);
-		fetchStarred(user, setName, setCreator).then((value) => {
-			setStarred(value);
-			setIsLoading(false);
-		});
+		getStarred();
 	}, []);
 	return (
 		<>
@@ -205,7 +234,7 @@ export const SaveBtn = ({ card, setName, setCreator, user, size, onDel }) => {
 				<IconButton isLoading size={size} />
 			) : (
 				<IconButton
-					icon={<IoIosStar color={starred ? checkIfStarred() ? "#f4bd55" : ink : ink} />}
+					icon={<IoIosStar color={starred ? includesStarred() ? "#f4bd55" : ink : ink} />}
 					onClick={starCard}
 					size={size}
 				/>

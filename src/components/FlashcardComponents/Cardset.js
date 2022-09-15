@@ -258,6 +258,8 @@ export const Cardset = () => {
 
   // add cards
   async function addCard() {
+    onAddClose();
+    
     let temp = cardData.cards.cards;
     temp.push({
       front: frontRef.current.value,
@@ -293,8 +295,6 @@ export const Cardset = () => {
         isClosable: true,
       });
     }
-
-    onAddClose();
   }
 
   // delete cards given cards index array
